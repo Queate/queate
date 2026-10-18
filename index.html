@@ -510,6 +510,9 @@
 
         const postCritiques = critiques ? critiques.filter(c => c.post_id === post.id) : [];
 
+        // Check if the current user can critique this post (must be logged in AND not the owner)
+        const canCritique = currentUser && !isOwner;
+
         return `
           <article class="bg-charcoal-800 border border-charcoal-700 rounded-lg overflow-hidden shadow-2xl">
             <div class="px-6 py-4 flex items-center justify-between border-b border-charcoal-700/60">
@@ -568,50 +571,61 @@
                   `).join('')}
               </div>
 
-              <div class="bg-charcoal-800 border border-charcoal-700 p-4 rounded space-y-4">
-                <p class="text-xs font-mono text-gray-300 uppercase">Leave Structured Critique</p>
-                
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-                  <div>
-                    <label class="block text-gray-400 mb-1">Composition (1-5)</label>
-                    <select id="compScore_${post.id}" class="w-full bg-charcoal-900 border border-charcoal-700 rounded p-1.5 text-white">
-                      <option value="5">5 - Exceptional</option>
-                      <option value="4">4 - Strong</option>
-                      <option value="3" selected>3 - Competent</option>
-                      <option value="2">2 - Needs Work</option>
-                      <option value="1">1 - Distracting</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label class="block text-gray-400 mb-1">Lighting / Tone (1-5)</label>
-                    <select id="lightScore_${post.id}" class="w-full bg-charcoal-900 border border-charcoal-700 rounded p-1.5 text-white">
-                      <option value="5">5 - Masterful</option>
-                      <option value="4">4 - Pleasing</option>
-                      <option value="3" selected>3 - Balanced</option>
-                      <option value="2">2 - Harsh/Flat</option>
-                      <option value="1">1 - Problematic</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label class="block text-gray-400 mb-1">Technical Execution (1-5)</label>
-                    <select id="techScore_${post.id}" class="w-full bg-charcoal-900 border border-charcoal-700 rounded p-1.5 text-white">
-                      <option value="5">5 - Flawless</option>
-                      <option value="4">4 - Sharp/Clean</option>
-                      <option value="3" selected>3 - Acceptable</option>
-                      <option value="2">2 - Soft/Noisy</option>
-                      <option value="1">1 - Failed</option>
-                    </select>
-                  </div>
+              <!-- Conditional Critique Submission Form -->
+              ${isOwner ? `
+                <div class="bg-charcoal-800 border border-charcoal-700 p-4 rounded text-center text-xs text-gray-400 italic">
+                  You cannot submit a critique for your own photograph.
                 </div>
+              ` : canCritique ? `
+                <div class="bg-charcoal-800 border border-charcoal-700 p-4 rounded space-y-4">
+                  <p class="text-xs font-mono text-gray-300 uppercase">Leave Structured Critique</p>
+                  
+                  <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                    <div>
+                      <label class="block text-gray-400 mb-1">Composition (1-5)</label>
+                      <select id="compScore_${post.id}" class="w-full bg-charcoal-900 border border-charcoal-700 rounded p-1.5 text-white">
+                        <option value="5">5 - Exceptional</option>
+                        <option value="4">4 - Strong</option>
+                        <option value="3" selected>3 - Competent</option>
+                        <option value="2">2 - Needs Work</option>
+                        <option value="1">1 - Distracting</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label class="block text-gray-400 mb-1">Lighting / Tone (1-5)</label>
+                      <select id="lightScore_${post.id}" class="w-full bg-charcoal-900 border border-charcoal-700 rounded p-1.5 text-white">
+                        <option value="5">5 - Masterful</option>
+                        <option value="4">4 - Pleasing</option>
+                        <option value="3" selected>3 - Balanced</option>
+                        <option value="2">2 - Harsh/Flat</option>
+                        <option value="1">1 - Problematic</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label class="block text-gray-400 mb-1">Technical Execution (1-5)</label>
+                      <select id="techScore_${post.id}" class="w-full bg-charcoal-900 border border-charcoal-700 rounded p-1.5 text-white">
+                        <option value="5">5 - Flawless</option>
+                        <option value="4">4 - Sharp/Clean</option>
+                        <option value="3" selected>3 - Acceptable</option>
+                        <option value="2">2 - Soft/Noisy</option>
+                        <option value="1">1 - Failed</option>
+                      </select>
+                    </div>
+                  </div>
 
-                <div>
-                  <textarea id="critiqueText_${post.id}" rows="3" placeholder="Provide constructive artistic & technical notes..." class="w-full bg-charcoal-900 border border-charcoal-700 rounded p-2.5 text-xs text-white focus:outline-none focus:border-gray-500"></textarea>
+                  <div>
+                    <textarea id="critiqueText_${post.id}" rows="3" placeholder="Provide constructive artistic & technical notes..." class="w-full bg-charcoal-900 border border-charcoal-700 rounded p-2.5 text-xs text-white focus:outline-none focus:border-gray-500"></textarea>
+                  </div>
+
+                  <button onclick="submitCritique('${post.id}')" class="bg-white text-charcoal-900 font-semibold px-4 py-2 rounded text-xs hover:bg-gray-200 transition">
+                    Submit Critique
+                  </button>
                 </div>
-
-                <button onclick="submitCritique('${post.id}')" class="bg-white text-charcoal-900 font-semibold px-4 py-2 rounded text-xs hover:bg-gray-200 transition">
-                  Submit Critique
-                </button>
-              </div>
+              ` : `
+                <div class="bg-charcoal-800 border border-charcoal-700 p-4 rounded text-center text-xs text-gray-400">
+                  Please <button onclick="openAuthModal()" class="text-white underline font-medium">sign in</button> to leave a critique.
+                </div>
+              `}
 
             </div>
           </article>
