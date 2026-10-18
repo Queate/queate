@@ -259,7 +259,7 @@
 
   <!-- Application Logic Script -->
   <script>
-// Supabase Configuration
+ // Supabase Configuration
     const SUPABASE_URL = 'https://rljhjqaqxzjfjcpkwaxy.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJsamhqcWFxeHpqZmpjcGt3YXh5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzMDUwNTAsImV4cCI6MjEwNzg4MTA1MH0.ZqPWN1GWmnbU677e8b4_1goXtm5S0dzf7g-UC6jDOzg';
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -524,7 +524,7 @@
             <div class="px-6 py-4 flex items-center justify-between border-b border-charcoal-700/60">
               <div>
                 <h3 class="font-medium text-white">${escapeHtml(post.title || 'Untitled Work')}</h3>
-                <p class="text-xs text-gray-400">By <span class="text-gray-300 font-mono">${escapeHtml(authorName)}</span> &bull; <span id="genreDisplay_${post.id}" class="text-gray-500">${escapeHtml(post.genre || 'General')}</span></p>
+                <p class="text-xs text-gray-400">By <span class="text-gray-300 font-mono">${escapeHtml(authorName)}</span> &bull; <span class="text-gray-500">${escapeHtml(post.genre || 'General')}</span></p>
               </div>
               <div class="flex items-center gap-3">
                 <span class="text-xs bg-charcoal-900 border border-charcoal-700 text-gray-400 px-2.5 py-1 rounded font-mono hidden sm:inline">Original Ratio</span>
@@ -536,7 +536,7 @@
               </div>
             </div>
 
-            <!-- Inline Edit Genre Box (Hidden by default) -->
+            <!-- Inline Edit Genre Box -->
             <div id="editGenreBox_${post.id}" class="hidden px-6 py-3 bg-charcoal-900 border-b border-charcoal-700 flex items-center gap-3 text-xs">
               <span class="text-gray-400 font-mono uppercase">Change Genre:</span>
               <select id="newGenre_${post.id}" class="bg-charcoal-800 border border-charcoal-700 rounded px-2.5 py-1 text-white font-mono">
@@ -703,7 +703,22 @@
                 <h3 class="font-medium text-white">${escapeHtml(post.title || 'Untitled Work')}</h3>
                 <p class="text-xs text-gray-400">Genre: <span class="text-gray-300">${escapeHtml(post.genre || 'General')}</span></p>
               </div>
-              <span class="text-xs bg-charcoal-900 border border-charcoal-700 text-gray-400 px-2.5 py-1 rounded font-mono">Original Ratio</span>
+              <div class="flex items-center gap-3">
+                <span class="text-xs bg-charcoal-900 border border-charcoal-700 text-gray-400 px-2.5 py-1 rounded font-mono hidden sm:inline">Original Ratio</span>
+                <button onclick="toggleEditGenre('profile_${post.id}')" title="Edit Genre" class="text-gray-400 hover:text-white p-1 transition">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Inline Edit Genre Box for Profile -->
+            <div id="editGenreBox_profile_${post.id}" class="hidden px-6 py-3 bg-charcoal-900 border-b border-charcoal-700 flex items-center gap-3 text-xs">
+              <span class="text-gray-400 font-mono uppercase">Change Genre:</span>
+              <select id="newGenre_profile_${post.id}" class="bg-charcoal-800 border border-charcoal-700 rounded px-2.5 py-1 text-white font-mono">
+                ${GENRES_LIST.map(g => `<option value="${g}" ${g === post.genre ? 'selected' : ''}>${g}</option>`).join('')}
+              </select>
+              <button onclick="saveNewGenreProfile('${post.id}')" class="bg-white text-charcoal-900 font-semibold px-3 py-1 rounded hover:bg-gray-200 transition">Save</button>
+              <button onclick="toggleEditGenre('profile_${post.id}')" class="text-gray-400 hover:text-white px-2 py-1">Cancel</button>
             </div>
 
             <div class="bg-black flex items-center justify-center p-2">
@@ -729,8 +744,8 @@
       }).join('');
     }
 
-    function toggleEditGenre(postId) {
-      const box = document.getElementById(`editGenreBox_${postId}`);
+    function toggleEditGenre(idKey) {
+      const box = document.getElementById(`editGenreBox_${idKey}`);
       if (box) {
         box.classList.toggle('hidden');
       }
@@ -750,6 +765,26 @@
 
         showToast('Genre updated successfully!');
         loadFeed();
+      } catch (err) {
+        console.error("Error updating genre:", err);
+        alert("Failed to update genre: " + err.message);
+      }
+    }
+
+    async function saveNewGenreProfile(postId) {
+      const newGenre = document.getElementById(`newGenre_profile_${postId}`).value;
+      if (!newGenre) return;
+
+      try {
+        const { error } = await supabaseClient
+          .from('posts')
+          .update({ genre: newGenre })
+          .eq('id', postId);
+
+        if (error) throw error;
+
+        showToast('Genre updated successfully!');
+        loadProfileFeed();
       } catch (err) {
         console.error("Error updating genre:", err);
         alert("Failed to update genre: " + err.message);
