@@ -541,8 +541,8 @@
                   Critiques (${postCritiques.length})
                 </button>
                 ${isOwner ? `
-                  <button onclick="deletePost('${post.id}', '${post.image_url}')" class="text-red-400 hover:text-red-300 text-xs flex items-center gap-1 transition font-mono">
-                    Delete
+                  <button onclick="deletePost('${post.id}', '${post.image_url}')" title="Delete Photograph" class="text-gray-400 hover:text-red-400 p-1.5 transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                   </button>
                 ` : ''}
               </div>
@@ -569,8 +569,8 @@
                               <span>Tech: <strong>${c.technical_score}/5</strong></span>
                             </div>
                             ${canDeleteCritique ? `
-                              <button onclick="deleteCritique('${c.id}')" class="text-red-400 hover:text-red-300 font-mono transition">
-                                Delete
+                              <button onclick="deleteCritique('${c.id}')" title="Delete Critique" class="text-gray-400 hover:text-red-400 p-1 transition">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                               </button>
                             ` : ''}
                           </div>
@@ -695,8 +695,8 @@
                 ${post.iso ? `<div><span class="text-gray-500">ISO:</span> ${escapeHtml(post.iso)}</div>` : ''}
               </div>
 
-              <button onclick="deletePost('${post.id}', '${post.image_url}')" class="text-red-400 hover:text-red-300 text-xs flex items-center gap-1 transition font-mono">
-                Delete Work
+              <button onclick="deletePost('${post.id}', '${post.image_url}')" title="Delete Photograph" class="text-gray-400 hover:text-red-400 p-1.5 transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
               </button>
             </div>
           </article>
