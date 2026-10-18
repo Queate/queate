@@ -81,29 +81,31 @@
     <div id="tabFeed" class="space-y-12">
       
       <!-- Feed Filter Header -->
-      <div class="flex flex-col gap-4 border-b border-charcoal-700 pb-4">
-        <div class="flex items-center justify-between">
-          <div>
-            <h1 class="text-2xl editorial-font italic font-light">The Curated Stream</h1>
-            <p class="text-xs text-gray-400 uppercase tracking-widest mt-0.5">Uncropped Native Aspect Ratios & Critique Hub</p>
-          </div>
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-charcoal-700 pb-4">
+        <div>
+          <h1 class="text-2xl editorial-font italic font-light">The Curated Stream</h1>
+          <p class="text-xs text-gray-400 uppercase tracking-widest mt-0.5">Uncropped Native Aspect Ratios & Critique Hub</p>
         </div>
         
-        <!-- Alphabetized Genre Filters -->
-        <div class="flex flex-wrap gap-2 text-xs">
-          <button onclick="filterGenre('All')" class="genre-btn px-3 py-1 rounded bg-charcoal-700 text-white transition">All</button>
-          <button onclick="filterGenre('Abstract')" class="genre-btn px-3 py-1 rounded text-gray-400 hover:text-white transition">Abstract</button>
-          <button onclick="filterGenre('Analog / Film')" class="genre-btn px-3 py-1 rounded text-gray-400 hover:text-white transition">Analog / Film</button>
-          <button onclick="filterGenre('Architecture')" class="genre-btn px-3 py-1 rounded text-gray-400 hover:text-white transition">Architecture</button>
-          <button onclick="filterGenre('Astro & Night')" class="genre-btn px-3 py-1 rounded text-gray-400 hover:text-white transition">Astro & Night</button>
-          <button onclick="filterGenre('Black & White')" class="genre-btn px-3 py-1 rounded text-gray-400 hover:text-white transition">B&W</button>
-          <button onclick="filterGenre('Fine Art')" class="genre-btn px-3 py-1 rounded text-gray-400 hover:text-white transition">Fine Art</button>
-          <button onclick="filterGenre('Landscape')" class="genre-btn px-3 py-1 rounded text-gray-400 hover:text-white transition">Landscape</button>
-          <button onclick="filterGenre('Minimalist')" class="genre-btn px-3 py-1 rounded text-gray-400 hover:text-white transition">Minimalist</button>
-          <button onclick="filterGenre('Portrait')" class="genre-btn px-3 py-1 rounded text-gray-400 hover:text-white transition">Portrait</button>
-          <button onclick="filterGenre('Street')" class="genre-btn px-3 py-1 rounded text-gray-400 hover:text-white transition">Street</button>
-          <button onclick="filterGenre('Travel & Culture')" class="genre-btn px-3 py-1 rounded text-gray-400 hover:text-white transition">Travel & Culture</button>
-          <button onclick="filterGenre('Wildlife & Nature')" class="genre-btn px-3 py-1 rounded text-gray-400 hover:text-white transition">Wildlife</button>
+        <!-- Dropdown Genre Filter Menu -->
+        <div class="flex items-center gap-2">
+          <label for="genreFilterSelect" class="text-xs uppercase tracking-wider text-gray-400 font-mono hidden sm:inline">Filter:</label>
+          <select id="genreFilterSelect" onchange="filterGenreDropdown(this.value)" class="bg-charcoal-800 border border-charcoal-700 rounded px-3 py-2 text-xs text-white focus:outline-none focus:border-gray-500 font-mono">
+            <option value="All">All Genres</option>
+            <option value="Abstract">Abstract</option>
+            <option value="Analog / Film">Analog / Film</option>
+            <option value="Architecture">Architecture</option>
+            <option value="Astro & Night">Astro & Night</option>
+            <option value="Black & White">Black & White</option>
+            <option value="Documentary">Documentary</option>
+            <option value="Fine Art">Fine Art</option>
+            <option value="Landscape">Landscape</option>
+            <option value="Minimalist">Minimalist</option>
+            <option value="Portrait">Portrait</option>
+            <option value="Street">Street</option>
+            <option value="Travel & Culture">Travel & Culture</option>
+            <option value="Wildlife & Nature">Wildlife & Nature</option>
+          </select>
         </div>
       </div>
 
@@ -259,7 +261,7 @@
   <script>
     // Supabase Configuration
     const SUPABASE_URL = 'https://rljhjqaqxzjfjcpkwaxy.supabase.co';
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJsamhqcWFxeHpqZmpjcGt3YXh5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzMDUwNTAsImV4cCI6MjEwNzg4MTA1MH0.ZqPWN1GWmnbU677e8b4_1goXtm5S0dzf7g-UC6jDOzg';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJsamhqcWFxeHpqZmpjcGt3YXh5Iiwicm9sZSI6InFub24iLCJpYXQiOjM3OTU2NzY0OTN9.Y8V_X6b797w3p4v197478640954388374829304910';
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let currentUser = null;
@@ -793,15 +795,8 @@
       }
     }
 
-    function filterGenre(genre) {
+    function filterGenreDropdown(genre) {
       currentGenreFilter = genre;
-      document.querySelectorAll('.genre-btn').forEach(btn => {
-        if (btn.textContent.trim() === genre) {
-          btn.className = 'genre-btn px-3 py-1 rounded bg-charcoal-700 text-white transition';
-        } else {
-          btn.className = 'genre-btn px-3 py-1 rounded text-gray-400 hover:text-white transition';
-        }
-      });
       loadFeed();
     }
 
