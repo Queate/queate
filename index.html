@@ -281,7 +281,10 @@
         currentUser = session.user;
         updateAuthUI();
       }
-      loadFeed();
+
+      // Restore last active tab or default to 'feed'
+      const savedTab = localStorage.getItem('queate_active_tab') || 'feed';
+      switchTab(savedTab, false);
     });
 
     function updateAuthUI() {
@@ -334,12 +337,17 @@
     async function handleSignOut() {
       await supabaseClient.auth.signOut();
       currentUser = null;
+      localStorage.removeItem('queate_active_tab');
       updateAuthUI();
       switchTab('feed');
       showToast('Signed out.');
     }
 
-    function switchTab(tabName) {
+    function switchTab(tabName, save = true) {
+      if (save) {
+        localStorage.setItem('queate_active_tab', tabName);
+      }
+
       const tabFeed = document.getElementById('tabFeed');
       const tabUpload = document.getElementById('tabUpload');
       const tabProfile = document.getElementById('tabProfile');
@@ -752,7 +760,8 @@
     }
 
     async function saveNewGenre(postId) {
-      const newGenre = document.getElementById(`newGenre_${postId}`).value;
+      const selectElement = document.getElementById(`newGenre_${postId}`);
+      const newGenre = selectElement ? selectElement.value : null;
       if (!newGenre) return;
 
       try {
@@ -764,7 +773,12 @@
         if (error) throw error;
 
         showToast('Genre updated successfully!');
-        loadFeed();
+        
+        if (!document.getElementById('tabProfile').classList.contains('hidden')) {
+          loadProfileFeed();
+        } else {
+          loadFeed();
+        }
       } catch (err) {
         console.error("Error updating genre:", err);
         alert("Failed to update genre: " + err.message);
@@ -772,7 +786,8 @@
     }
 
     async function saveNewGenreProfile(postId) {
-      const newGenre = document.getElementById(`newGenre_profile_${postId}`).value;
+      const selectElement = document.getElementById(`newGenre_profile_${postId}`);
+      const newGenre = selectElement ? selectElement.value : null;
       if (!newGenre) return;
 
       try {
