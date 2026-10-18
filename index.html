@@ -509,8 +509,6 @@
           : 'Artist';
 
         const postCritiques = critiques ? critiques.filter(c => c.post_id === post.id) : [];
-
-        // Check if the current user can critique this post (must be logged in AND not the owner)
         const canCritique = currentUser && !isOwner;
 
         return `
@@ -556,19 +554,29 @@
               
               <div class="space-y-4">
                 ${postCritiques.length === 0 ? `<p class="text-xs text-gray-500 italic">No critiques submitted yet. Be the first to offer constructive feedback.</p>` : 
-                  postCritiques.map(c => `
-                    <div class="bg-charcoal-800 border border-charcoal-700/80 p-4 rounded text-xs space-y-2">
-                      <div class="flex items-center justify-between text-gray-400 font-mono">
-                        <span>By ${escapeHtml(c.user_email.split('@')[0])}</span>
-                        <div class="flex gap-3">
-                          <span>Comp: <strong>${c.composition_score}/5</strong></span>
-                          <span>Light: <strong>${c.lighting_score}/5</strong></span>
-                          <span>Tech: <strong>${c.technical_score}/5</strong></span>
+                  postCritiques.map(c => {
+                    const isCritiqueOwner = currentUser && currentUser.id === c.user_id;
+                    return `
+                      <div class="bg-charcoal-800 border border-charcoal-700/80 p-4 rounded text-xs space-y-2">
+                        <div class="flex items-center justify-between text-gray-400 font-mono">
+                          <span>By ${escapeHtml(c.user_email.split('@')[0])}</span>
+                          <div class="flex items-center gap-4">
+                            <div class="flex gap-3">
+                              <span>Comp: <strong>${c.composition_score}/5</strong></span>
+                              <span>Light: <strong>${c.lighting_score}/5</strong></span>
+                              <span>Tech: <strong>${c.technical_score}/5</strong></span>
+                            </div>
+                            ${isCritiqueOwner ? `
+                              <button onclick="deleteCritique('${c.id}')" class="text-red-400 hover:text-red-300 font-mono transition">
+                                Delete
+                              </button>
+                            ` : ''}
+                          </div>
                         </div>
+                        <p class="text-gray-200 leading-relaxed font-sans">${escapeHtml(c.feedback_text)}</p>
                       </div>
-                      <p class="text-gray-200 leading-relaxed font-sans">${escapeHtml(c.feedback_text)}</p>
-                    </div>
-                  `).join('')}
+                    `;
+                  }).join('')}
               </div>
 
               <!-- Conditional Critique Submission Form -->
@@ -735,6 +743,25 @@
       } catch (err) {
         console.error("Critique error:", err);
         alert("Failed to submit critique: " + err.message);
+      }
+    }
+
+    async function deleteCritique(critiqueId) {
+      if (!confirm("Are you sure you want to delete this critique?")) return;
+
+      try {
+        const { error } = await supabaseClient
+          .from('critiques')
+          .delete()
+          .eq('id', critiqueId);
+
+        if (error) throw error;
+
+        showToast('Critique deleted successfully.');
+        loadFeed();
+      } catch (err) {
+        console.error("Error deleting critique:", err);
+        alert("Failed to delete critique: " + err.message);
       }
     }
 
