@@ -57,7 +57,7 @@
         </div>
       </div>
 
-<!-- Navigation Links & Actions -->
+      <!-- Navigation Links & Actions -->
       <div class="flex items-center gap-4">
         <button onclick="switchTab('feed')" id="navFeed" class="text-sm font-medium text-white px-3 py-1.5 rounded bg-charcoal-700 transition">Gallery</button>
         <button onclick="switchTab('profile')" id="navProfile" class="text-sm font-medium text-gray-400 hover:text-white px-3 py-1.5 rounded transition hidden auth-required">My Profile</button>
@@ -81,25 +81,30 @@
     <div id="tabFeed" class="space-y-12">
       
       <!-- Feed Filter Header -->
-      <div class="flex items-center justify-between border-b border-charcoal-700 pb-4">
-        <div>
-          <h1 class="text-2xl editorial-font italic font-light">The Curated Stream</h1>
-          <p class="text-xs text-gray-400 uppercase tracking-widest mt-0.5">Uncropped Native Aspect Ratios</p>
+      <div class="flex flex-col gap-4 border-b border-charcoal-700 pb-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <h1 class="text-2xl editorial-font italic font-light">The Curated Stream</h1>
+            <p class="text-xs text-gray-400 uppercase tracking-widest mt-0.5">Uncropped Native Aspect Ratios & Critique Hub</p>
+          </div>
         </div>
+        
+        <!-- Alphabetized Genre Filters -->
         <div class="flex flex-wrap gap-2 text-xs">
-  <button onclick="filterGenre('All')" class="genre-btn px-3 py-1 rounded bg-charcoal-700 text-white transition">All</button>
-  <button onclick="filterGenre('Abstract')" class="genre-btn px-3 py-1 rounded text-gray-400 hover:text-white transition">Abstract</button>
-  <button onclick="filterGenre('Analog / Film')" class="genre-btn px-3 py-1 rounded text-gray-400 hover:text-white transition">Analog / Film</button>
-  <button onclick="filterGenre('Architecture')" class="genre-btn px-3 py-1 rounded text-gray-400 hover:text-white transition">Architecture</button>
-  <button onclick="filterGenre('Astro & Night')" class="genre-btn px-3 py-1 rounded text-gray-400 hover:text-white transition">Astro & Night</button>
-  <button onclick="filterGenre('Black & White')" class="genre-btn px-3 py-1 rounded text-gray-400 hover:text-white transition">B&W</button>
-  <button onclick="filterGenre('Fine Art')" class="genre-btn px-3 py-1 rounded text-gray-400 hover:text-white transition">Fine Art</button>
-  <button onclick="filterGenre('Landscape')" class="genre-btn px-3 py-1 rounded text-gray-400 hover:text-white transition">Landscape</button>
-  <button onclick="filterGenre('Minimalist')" class="genre-btn px-3 py-1 rounded text-gray-400 hover:text-white transition">Minimalist</button>
-  <button onclick="filterGenre('Portrait')" class="genre-btn px-3 py-1 rounded text-gray-400 hover:text-white transition">Portrait</button>
-  <button onclick="filterGenre('Street')" class="genre-btn px-3 py-1 rounded text-gray-400 hover:text-white transition">Street</button>
-  <button onclick="filterGenre('Wildlife & Nature')" class="genre-btn px-3 py-1 rounded text-gray-400 hover:text-white transition">Wildlife</button>
-</div>
+          <button onclick="filterGenre('All')" class="genre-btn px-3 py-1 rounded bg-charcoal-700 text-white transition">All</button>
+          <button onclick="filterGenre('Abstract')" class="genre-btn px-3 py-1 rounded text-gray-400 hover:text-white transition">Abstract</button>
+          <button onclick="filterGenre('Analog / Film')" class="genre-btn px-3 py-1 rounded text-gray-400 hover:text-white transition">Analog / Film</button>
+          <button onclick="filterGenre('Architecture')" class="genre-btn px-3 py-1 rounded text-gray-400 hover:text-white transition">Architecture</button>
+          <button onclick="filterGenre('Astro & Night')" class="genre-btn px-3 py-1 rounded text-gray-400 hover:text-white transition">Astro & Night</button>
+          <button onclick="filterGenre('Black & White')" class="genre-btn px-3 py-1 rounded text-gray-400 hover:text-white transition">B&W</button>
+          <button onclick="filterGenre('Fine Art')" class="genre-btn px-3 py-1 rounded text-gray-400 hover:text-white transition">Fine Art</button>
+          <button onclick="filterGenre('Landscape')" class="genre-btn px-3 py-1 rounded text-gray-400 hover:text-white transition">Landscape</button>
+          <button onclick="filterGenre('Minimalist')" class="genre-btn px-3 py-1 rounded text-gray-400 hover:text-white transition">Minimalist</button>
+          <button onclick="filterGenre('Portrait')" class="genre-btn px-3 py-1 rounded text-gray-400 hover:text-white transition">Portrait</button>
+          <button onclick="filterGenre('Street')" class="genre-btn px-3 py-1 rounded text-gray-400 hover:text-white transition">Street</button>
+          <button onclick="filterGenre('Travel & Culture')" class="genre-btn px-3 py-1 rounded text-gray-400 hover:text-white transition">Travel & Culture</button>
+          <button onclick="filterGenre('Wildlife & Nature')" class="genre-btn px-3 py-1 rounded text-gray-400 hover:text-white transition">Wildlife</button>
+        </div>
       </div>
 
       <!-- Posts Feed Stream -->
@@ -108,7 +113,8 @@
       </div>
 
     </div>
-<!-- PROFILE PORTFOLIO TAB -->
+
+    <!-- PROFILE PORTFOLIO TAB -->
     <div id="tabProfile" class="hidden space-y-12">
       <div class="border-b border-charcoal-700 pb-4 flex items-center justify-between">
         <div>
@@ -122,6 +128,7 @@
         <div class="text-center py-20 text-gray-500 font-light">Loading your portfolio...</div>
       </div>
     </div>
+
     <!-- PUBLISH / UPLOAD TAB -->
     <div id="tabUpload" class="hidden max-w-2xl mx-auto bg-charcoal-800 border border-charcoal-700 rounded-lg p-6 sm:p-8 shadow-xl">
       <div class="mb-6">
@@ -151,20 +158,20 @@
           <div>
             <label class="block text-xs uppercase tracking-wider text-gray-400 mb-1 font-mono">Genre Category</label>
             <select id="photoGenre" class="w-full bg-charcoal-900 border border-charcoal-700 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-gray-500">
-<option value="Abstract">Abstract</option>
-  <option value="Analog / Film">Analog / Film</option>
-  <option value="Architecture">Architecture</option>
-  <option value="Astro & Night">Astro & Night</option>
-  <option value="Black & White">Black & White</option>
-  <option value="Documentary">Documentary</option>
-  <option value="Fine Art">Fine Art</option>
-  <option value="Landscape">Landscape</option>
-  <option value="Minimalist">Minimalist</option>
-  <option value="Portrait">Portrait</option>
-  <option value="Street">Street</option>
-  <option value="Travel & Culture">Travel & Culture</option>
-  <option value="Wildlife & Nature">Wildlife & Nature</option>
-</select>
+              <option value="Abstract">Abstract</option>
+              <option value="Analog / Film">Analog / Film</option>
+              <option value="Architecture">Architecture</option>
+              <option value="Astro & Night">Astro & Night</option>
+              <option value="Black & White">Black & White</option>
+              <option value="Documentary">Documentary</option>
+              <option value="Fine Art">Fine Art</option>
+              <option value="Landscape">Landscape</option>
+              <option value="Minimalist">Minimalist</option>
+              <option value="Portrait">Portrait</option>
+              <option value="Street">Street</option>
+              <option value="Travel & Culture">Travel & Culture</option>
+              <option value="Wildlife & Nature">Wildlife & Nature</option>
+            </select>
           </div>
         </div>
 
@@ -250,7 +257,7 @@
 
   <!-- Application Logic Script -->
   <script>
- // Supabase Configuration
+    // Supabase Configuration
     const SUPABASE_URL = 'https://rljhjqaqxzjfjcpkwaxy.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJsamhqcWFxeHpqZmpjcGt3YXh5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzMDUwNTAsImV4cCI6MjEwNzg4MTA1MH0.ZqPWN1GWmnbU677e8b4_1goXtm5S0dzf7g-UC6jDOzg';
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -333,7 +340,6 @@
       const navUpload = document.getElementById('navUpload');
       const navProfile = document.getElementById('navProfile');
 
-      // Reset all tab classes to inactive
       [tabFeed, tabUpload, tabProfile].forEach(t => t.classList.add('hidden'));
       [navFeed, navUpload, navProfile].forEach(n => {
         n.className = 'text-sm font-medium text-gray-400 hover:text-white px-3 py-1.5 rounded transition';
@@ -363,70 +369,6 @@
           navProfile.className = 'text-sm font-medium text-gray-400 hover:text-white px-3 py-1.5 rounded transition auth-required';
         }
       }
-    }
-
-    // Load Only Current User's Portfolio
-    async function loadProfileFeed() {
-      const profileContainer = document.getElementById('profileFeed');
-      if (!currentUser) return;
-
-      document.getElementById('profileEmailDisplay').textContent = currentUser.email;
-      profileContainer.innerHTML = `<p class="text-center text-gray-500 py-20 font-light">Loading your portfolio...</p>`;
-
-      const { data: posts, error } = await supabaseClient
-        .from('posts')
-        .select('*')
-        .eq('user_id', currentUser.id)
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error("Error loading profile feed:", error);
-        profileContainer.innerHTML = `<p class="text-center text-red-400 py-12">Failed to load profile: ${escapeHtml(error.message)}</p>`;
-        return;
-      }
-
-      if (!posts || posts.length === 0) {
-        profileContainer.innerHTML = `
-          <div class="text-center py-24 space-y-3">
-            <p class="text-gray-400 editorial-font italic text-xl">You haven't published any photographs yet.</p>
-            <p class="text-xs text-gray-500 uppercase tracking-widest font-mono">Share your work via "+ Publish Work".</p>
-          </div>`;
-        return;
-      }
-
-      profileContainer.innerHTML = posts.map(post => {
-        return `
-          <article class="bg-charcoal-800 border border-charcoal-700 rounded-lg overflow-hidden shadow-2xl">
-            <div class="px-6 py-4 flex items-center justify-between border-b border-charcoal-700/60">
-              <div>
-                <h3 class="font-medium text-white">${escapeHtml(post.title || 'Untitled Work')}</h3>
-                <p class="text-xs text-gray-400">Genre: <span class="text-gray-300">${escapeHtml(post.genre || 'General')}</span></p>
-              </div>
-              <span class="text-xs bg-charcoal-900 border border-charcoal-700 text-gray-400 px-2.5 py-1 rounded font-mono">Original Ratio</span>
-            </div>
-
-            <div class="bg-black flex items-center justify-center p-2">
-              <img src="${escapeHtml(post.image_url)}" alt="${escapeHtml(post.title || 'Photograph')}" class="max-h-[85vh] w-auto object-contain">
-            </div>
-
-            <div class="px-6 py-4 bg-charcoal-800/90 border-t border-charcoal-700/60 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div class="grid grid-cols-2 sm:flex sm:flex-wrap gap-x-6 gap-y-1 text-xs font-mono text-gray-300">
-                ${post.camera ? `<div><span class="text-gray-500">Body:</span> ${escapeHtml(post.camera)}</div>` : ''}
-                ${post.lens ? `<div><span class="text-gray-500">Lens:</span> ${escapeHtml(post.lens)}</div>` : ''}
-                ${post.focal_length ? `<div><span class="text-gray-500">Focal:</span> ${escapeHtml(post.focal_length)}</div>` : ''}
-                ${post.aperture ? `<div><span class="text-gray-500">Aperture:</span> ${escapeHtml(post.aperture)}</div>` : ''}
-                ${post.shutter_speed ? `<div><span class="text-gray-500">Shutter:</span> ${escapeHtml(post.shutter_speed)}</div>` : ''}
-                ${post.iso ? `<div><span class="text-gray-500">ISO:</span> ${escapeHtml(post.iso)}</div>` : ''}
-              </div>
-
-              <button onclick="deletePost('${post.id}', '${post.image_url}')" class="text-red-400 hover:text-red-300 text-xs flex items-center gap-1 transition self-start sm:self-auto font-mono">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                Delete Work
-              </button>
-            </div>
-          </article>
-        `;
-      }).join('');
     }
 
     function handleFileSelect(e) {
@@ -529,6 +471,7 @@
 
     async function loadFeed() {
       const feedContainer = document.getElementById('postsFeed');
+      feedContainer.innerHTML = `<p class="text-center text-gray-500 py-20 font-light">Loading photographs...</p>`;
       
       let query = supabaseClient.from('posts').select('*').order('created_at', { ascending: false });
       if (currentGenreFilter !== 'All') {
@@ -552,11 +495,20 @@
         return;
       }
 
+      const postIds = posts.map(p => p.id);
+      const { data: critiques } = await supabaseClient
+        .from('critiques')
+        .select('*')
+        .in('post_id', postIds)
+        .order('created_at', { ascending: false });
+
       feedContainer.innerHTML = posts.map(post => {
         const isOwner = currentUser && currentUser.id === post.user_id;
         const authorName = (post.user_email && typeof post.user_email === 'string') 
           ? post.user_email.split('@')[0] 
           : 'Artist';
+
+        const postCritiques = critiques ? critiques.filter(c => c.post_id === post.id) : [];
 
         return `
           <article class="bg-charcoal-800 border border-charcoal-700 rounded-lg overflow-hidden shadow-2xl">
@@ -564,6 +516,143 @@
               <div>
                 <h3 class="font-medium text-white">${escapeHtml(post.title || 'Untitled Work')}</h3>
                 <p class="text-xs text-gray-400">By <span class="text-gray-300 font-mono">${escapeHtml(authorName)}</span> &bull; <span class="text-gray-500">${escapeHtml(post.genre || 'General')}</span></p>
+              </div>
+              <span class="text-xs bg-charcoal-900 border border-charcoal-700 text-gray-400 px-2.5 py-1 rounded font-mono">Original Ratio</span>
+            </div>
+
+            <div class="bg-black flex items-center justify-center p-2">
+              <img src="${escapeHtml(post.image_url)}" alt="${escapeHtml(post.title || 'Photograph')}" class="max-h-[85vh] w-auto object-contain">
+            </div>
+
+            <!-- EXIF Drawer & Actions -->
+            <div class="px-6 py-4 bg-charcoal-800/90 border-t border-charcoal-700/60 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div class="grid grid-cols-2 sm:flex sm:flex-wrap gap-x-6 gap-y-1 text-xs font-mono text-gray-300">
+                ${post.camera ? `<div><span class="text-gray-500">Body:</span> ${escapeHtml(post.camera)}</div>` : ''}
+                ${post.lens ? `<div><span class="text-gray-500">Lens:</span> ${escapeHtml(post.lens)}</div>` : ''}
+                ${post.focal_length ? `<div><span class="text-gray-500">Focal:</span> ${escapeHtml(post.focal_length)}</div>` : ''}
+                ${post.aperture ? `<div><span class="text-gray-500">Aperture:</span> ${escapeHtml(post.aperture)}</div>` : ''}
+                ${post.shutter_speed ? `<div><span class="text-gray-500">Shutter:</span> ${escapeHtml(post.shutter_speed)}</div>` : ''}
+                ${post.iso ? `<div><span class="text-gray-500">ISO:</span> ${escapeHtml(post.iso)}</div>` : ''}
+              </div>
+
+              <div class="flex items-center gap-3">
+                <button onclick="toggleCritiqueSection('${post.id}')" class="text-xs text-gray-300 bg-charcoal-700 hover:bg-charcoal-600 px-3 py-1.5 rounded transition font-mono">
+                  Critiques (${postCritiques.length})
+                </button>
+                ${isOwner ? `
+                  <button onclick="deletePost('${post.id}', '${post.image_url}')" class="text-red-400 hover:text-red-300 text-xs flex items-center gap-1 transition font-mono">
+                    Delete
+                  </button>
+                ` : ''}
+              </div>
+            </div>
+
+            <!-- Critique Section Drawer -->
+            <div id="critiqueSection_${post.id}" class="hidden border-t border-charcoal-700 bg-charcoal-900/90 p-6 space-y-6">
+              <h4 class="text-xs uppercase tracking-wider text-gray-400 font-mono">Artistic & Technical Critiques</h4>
+              
+              <div class="space-y-4">
+                ${postCritiques.length === 0 ? `<p class="text-xs text-gray-500 italic">No critiques submitted yet. Be the first to offer constructive feedback.</p>` : 
+                  postCritiques.map(c => `
+                    <div class="bg-charcoal-800 border border-charcoal-700/80 p-4 rounded text-xs space-y-2">
+                      <div class="flex items-center justify-between text-gray-400 font-mono">
+                        <span>By ${escapeHtml(c.user_email.split('@')[0])}</span>
+                        <div class="flex gap-3">
+                          <span>Comp: <strong>${c.composition_score}/5</strong></span>
+                          <span>Light: <strong>${c.lighting_score}/5</strong></span>
+                          <span>Tech: <strong>${c.technical_score}/5</strong></span>
+                        </div>
+                      </div>
+                      <p class="text-gray-200 leading-relaxed font-sans">${escapeHtml(c.feedback_text)}</p>
+                    </div>
+                  `).join('')}
+              </div>
+
+              <div class="bg-charcoal-800 border border-charcoal-700 p-4 rounded space-y-4">
+                <p class="text-xs font-mono text-gray-300 uppercase">Leave Structured Critique</p>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                  <div>
+                    <label class="block text-gray-400 mb-1">Composition (1-5)</label>
+                    <select id="compScore_${post.id}" class="w-full bg-charcoal-900 border border-charcoal-700 rounded p-1.5 text-white">
+                      <option value="5">5 - Exceptional</option>
+                      <option value="4">4 - Strong</option>
+                      <option value="3" selected>3 - Competent</option>
+                      <option value="2">2 - Needs Work</option>
+                      <option value="1">1 - Distracting</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-gray-400 mb-1">Lighting / Tone (1-5)</label>
+                    <select id="lightScore_${post.id}" class="w-full bg-charcoal-900 border border-charcoal-700 rounded p-1.5 text-white">
+                      <option value="5">5 - Masterful</option>
+                      <option value="4">4 - Pleasing</option>
+                      <option value="3" selected>3 - Balanced</option>
+                      <option value="2">2 - Harsh/Flat</option>
+                      <option value="1">1 - Problematic</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-gray-400 mb-1">Technical Execution (1-5)</label>
+                    <select id="techScore_${post.id}" class="w-full bg-charcoal-900 border border-charcoal-700 rounded p-1.5 text-white">
+                      <option value="5">5 - Flawless</option>
+                      <option value="4">4 - Sharp/Clean</option>
+                      <option value="3" selected>3 - Acceptable</option>
+                      <option value="2">2 - Soft/Noisy</option>
+                      <option value="1">1 - Failed</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <textarea id="critiqueText_${post.id}" rows="3" placeholder="Provide constructive artistic & technical notes..." class="w-full bg-charcoal-900 border border-charcoal-700 rounded p-2.5 text-xs text-white focus:outline-none focus:border-gray-500"></textarea>
+                </div>
+
+                <button onclick="submitCritique('${post.id}')" class="bg-white text-charcoal-900 font-semibold px-4 py-2 rounded text-xs hover:bg-gray-200 transition">
+                  Submit Critique
+                </button>
+              </div>
+
+            </div>
+          </article>
+        `;
+      }).join('');
+    }
+
+    async function loadProfileFeed() {
+      const profileContainer = document.getElementById('profileFeed');
+      if (!currentUser) return;
+
+      document.getElementById('profileEmailDisplay').textContent = currentUser.email;
+      profileContainer.innerHTML = `<p class="text-center text-gray-500 py-20 font-light">Loading your portfolio...</p>`;
+
+      const { data: posts, error } = await supabaseClient
+        .from('posts')
+        .select('*')
+        .eq('user_id', currentUser.id)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        profileContainer.innerHTML = `<p class="text-center text-red-400 py-12">Failed to load profile: ${escapeHtml(error.message)}</p>`;
+        return;
+      }
+
+      if (!posts || posts.length === 0) {
+        profileContainer.innerHTML = `
+          <div class="text-center py-24 space-y-3">
+            <p class="text-gray-400 editorial-font italic text-xl">You haven't published any photographs yet.</p>
+            <p class="text-xs text-gray-500 uppercase tracking-widest font-mono">Share your work via "+ Publish Work".</p>
+          </div>`;
+        return;
+      }
+
+      profileContainer.innerHTML = posts.map(post => {
+        return `
+          <article class="bg-charcoal-800 border border-charcoal-700 rounded-lg overflow-hidden shadow-2xl">
+            <div class="px-6 py-4 flex items-center justify-between border-b border-charcoal-700/60">
+              <div>
+                <h3 class="font-medium text-white">${escapeHtml(post.title || 'Untitled Work')}</h3>
+                <p class="text-xs text-gray-400">Genre: <span class="text-gray-300">${escapeHtml(post.genre || 'General')}</span></p>
               </div>
               <span class="text-xs bg-charcoal-900 border border-charcoal-700 text-gray-400 px-2.5 py-1 rounded font-mono">Original Ratio</span>
             </div>
@@ -582,16 +671,57 @@
                 ${post.iso ? `<div><span class="text-gray-500">ISO:</span> ${escapeHtml(post.iso)}</div>` : ''}
               </div>
 
-              ${isOwner ? `
-                <button onclick="deletePost('${post.id}', '${post.image_url}')" class="text-red-400 hover:text-red-300 text-xs flex items-center gap-1 transition self-start sm:self-auto font-mono">
-                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                  Delete Work
-                </button>
-              ` : ''}
+              <button onclick="deletePost('${post.id}', '${post.image_url}')" class="text-red-400 hover:text-red-300 text-xs flex items-center gap-1 transition font-mono">
+                Delete Work
+              </button>
             </div>
           </article>
         `;
       }).join('');
+    }
+
+    function toggleCritiqueSection(postId) {
+      const section = document.getElementById(`critiqueSection_${postId}`);
+      if (section) {
+        section.classList.toggle('hidden');
+      }
+    }
+
+    async function submitCritique(postId) {
+      if (!currentUser) {
+        openAuthModal();
+        return;
+      }
+
+      const comp = document.getElementById(`compScore_${postId}`).value;
+      const light = document.getElementById(`lightScore_${postId}`).value;
+      const tech = document.getElementById(`techScore_${postId}`).value;
+      const text = document.getElementById(`critiqueText_${postId}`).value;
+
+      if (!text.trim()) {
+        alert("Please provide some written constructive feedback.");
+        return;
+      }
+
+      try {
+        const { error } = await supabaseClient.from('critiques').insert([{
+          post_id: postId,
+          user_id: currentUser.id,
+          user_email: currentUser.email,
+          composition_score: parseInt(comp),
+          lighting_score: parseInt(light),
+          technical_score: parseInt(tech),
+          feedback_text: text
+        }]);
+
+        if (error) throw error;
+
+        showToast('Critique submitted successfully.');
+        loadFeed();
+      } catch (err) {
+        console.error("Critique error:", err);
+        alert("Failed to submit critique: " + err.message);
+      }
     }
 
     async function deletePost(postId, imageUrl) {
@@ -609,7 +739,6 @@
 
         showToast('Photograph deleted successfully.');
         
-        // Refresh whichever view is currently open
         if (!document.getElementById('tabProfile').classList.contains('hidden')) {
           loadProfileFeed();
         } else {
@@ -624,7 +753,7 @@
     function filterGenre(genre) {
       currentGenreFilter = genre;
       document.querySelectorAll('.genre-btn').forEach(btn => {
-        if (btn.textContent === genre) {
+        if (btn.textContent.trim() === genre) {
           btn.className = 'genre-btn px-3 py-1 rounded bg-charcoal-700 text-white transition';
         } else {
           btn.className = 'genre-btn px-3 py-1 rounded text-gray-400 hover:text-white transition';
