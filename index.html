@@ -556,6 +556,8 @@
                 ${postCritiques.length === 0 ? `<p class="text-xs text-gray-500 italic">No critiques submitted yet. Be the first to offer constructive feedback.</p>` : 
                   postCritiques.map(c => {
                     const isCritiqueOwner = currentUser && currentUser.id === c.user_id;
+                    const canDeleteCritique = currentUser && (isCritiqueOwner || isOwner);
+
                     return `
                       <div class="bg-charcoal-800 border border-charcoal-700/80 p-4 rounded text-xs space-y-2">
                         <div class="flex items-center justify-between text-gray-400 font-mono">
@@ -566,7 +568,7 @@
                               <span>Light: <strong>${c.lighting_score}/5</strong></span>
                               <span>Tech: <strong>${c.technical_score}/5</strong></span>
                             </div>
-                            ${isCritiqueOwner ? `
+                            ${canDeleteCritique ? `
                               <button onclick="deleteCritique('${c.id}')" class="text-red-400 hover:text-red-300 font-mono transition">
                                 Delete
                               </button>
