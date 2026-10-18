@@ -122,7 +122,7 @@
       <div class="border-b border-charcoal-700 pb-4 flex items-center justify-between">
         <div>
           <h1 class="text-2xl editorial-font italic font-light">My Portfolio</h1>
-          <p id="profileEmailDisplay" class="text-xs text-gray-400 uppercase tracking-widest mt-0.5 font-mono">Photographer Profile</p>
+          <p id="profileHandleDisplay" class="text-xs text-gray-400 uppercase tracking-widest mt-0.5 font-mono">@handle</p>
         </div>
         <span class="text-xs bg-charcoal-800 border border-charcoal-700 text-gray-300 px-3 py-1 rounded font-mono">Uncropped Collection</span>
       </div>
@@ -136,12 +136,21 @@
     <div id="tabAccount" class="hidden max-w-xl mx-auto bg-charcoal-800 border border-charcoal-700 rounded-lg p-6 sm:p-8 shadow-xl space-y-6">
       <div class="border-b border-charcoal-700 pb-4">
         <h2 class="text-2xl editorial-font italic font-light">Account Settings</h2>
-        <p class="text-xs text-gray-400 mt-1 uppercase tracking-wider font-mono">Manage credentials and photographer identity.</p>
+        <p class="text-xs text-gray-400 mt-1 uppercase tracking-wider font-mono">Manage credentials and photographer handle.</p>
       </div>
 
       <form onsubmit="handleUpdateAccount(event)" class="space-y-4">
         <div>
-          <label class="block text-xs uppercase tracking-wider text-gray-400 mb-1 font-mono">Display Name / Photographer Name</label>
+          <label class="block text-xs uppercase tracking-wider text-gray-400 mb-1 font-mono">Photographer Handle (@)</label>
+          <div class="relative flex items-center">
+            <span class="absolute left-3 text-gray-500 font-mono text-sm">@</span>
+            <input type="text" id="accountHandle" required placeholder="username" class="w-full bg-charcoal-900 border border-charcoal-700 rounded pl-7 pr-3 py-2 text-sm text-white focus:outline-none focus:border-gray-500 font-mono">
+          </div>
+          <p class="text-[10px] text-gray-500 mt-1">Unique handle for future friend searches.</p>
+        </div>
+
+        <div>
+          <label class="block text-xs uppercase tracking-wider text-gray-400 mb-1 font-mono">Display Name</label>
           <input type="text" id="accountName" placeholder="e.g. Ansel Adams" class="w-full bg-charcoal-900 border border-charcoal-700 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-gray-500">
         </div>
 
@@ -270,7 +279,7 @@
 
         <div class="flex gap-3 pt-2">
           <button onclick="handleSignIn()" class="flex-1 bg-white text-charcoal-900 font-semibold py-2 rounded text-sm hover:bg-gray-200 transition">Sign In</button>
-          <button onclick="handleSignUp()" class="flex-1 bg-charcoal-700 text-white font-semibold py-2 rounded text-sm hover:bg-charcoal-600 transition">Create Account</button>
+          <button onclick="handleSignUp()" class="flex-1 bg-charcoal-700 text-white font-semibold py-2 rounded text-sm hover:bg-gray-600 transition">Create Account</button>
         </div>
       </div>
     </div>
@@ -289,9 +298,9 @@
 
   <!-- Application Logic Script -->
   <script>
- // Supabase Configuration
+    // Supabase Configuration
     const SUPABASE_URL = 'https://rljhjqaqxzjfjcpkwaxy.supabase.co';
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJsamhqcWFxeHpqZmpjcGt3YXh5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzMDUwNTAsImV4cCI6MjEwNzg4MTA1MH0.ZqPWN1GWmnbU677e8b4_1goXtm5S0dzf7g-UC6jDOzg';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJsamhqcWFxeHpqZmpjcGt3YXh5Iiwicm9sZSI6InFub24iLCJpYXQiOjM3OTU2NzY0OTN9.Y8V_X6b797w3p4v197478640954388374829304910';
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let currentUser = null;
@@ -309,6 +318,7 @@
       const { data: { session } } = await supabaseClient.auth.getSession();
       if (session) {
         currentUser = session.user;
+        ensureDefaultHandle();
         updateAuthUI();
       }
 
@@ -317,14 +327,30 @@
       switchTab(savedTab, false);
     });
 
+    // Automatically assign a default handle if one doesn't exist
+    async function ensureDefaultHandle() {
+      if (!currentUser) return;
+      const metadata = currentUser.user_metadata || {};
+      if (!metadata.handle) {
+        const defaultHandle = currentUser.email.split('@')[0].toLowerCase().replace(/[^a-z0-9_]/g, '');
+        const { data, error } = await supabaseClient.auth.updateUser({
+          data: { ...metadata, handle: defaultHandle }
+        });
+        if (!error && data.user) {
+          currentUser = data.user;
+        }
+      }
+    }
+
     function updateAuthUI() {
       const authContainer = document.getElementById('authContainer');
       const authRequiredElements = document.querySelectorAll('.auth-required');
       
       if (currentUser) {
+        const userHandle = currentUser.user_metadata?.handle ? `@${currentUser.user_metadata.handle}` : currentUser.email;
         authContainer.innerHTML = `
           <div class="flex items-center gap-3">
-            <span class="text-xs text-gray-300 font-mono hidden sm:inline">${currentUser.user_metadata?.display_name || currentUser.email}</span>
+            <span class="text-xs text-gray-300 font-mono hidden sm:inline">${userHandle}</span>
             <button onclick="handleSignOut()" class="text-xs text-gray-400 hover:text-white border border-charcoal-700 px-3 py-1.5 rounded transition">Sign Out</button>
           </div>
         `;
@@ -348,6 +374,7 @@
       const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
       if (error) { alert(error.message); return; }
       currentUser = data.user;
+      await ensureDefaultHandle();
       updateAuthUI();
       closeAuthModal();
       showToast('Signed in successfully.');
@@ -356,7 +383,15 @@
     async function handleSignUp() {
       const email = document.getElementById('authEmail').value;
       const password = document.getElementById('authPassword').value;
-      const { data, error } = await supabaseClient.auth.signUp({ email, password });
+      const defaultHandle = email.split('@')[0].toLowerCase().replace(/[^a-z0-9_]/g, '');
+
+      const { data, error } = await supabaseClient.auth.signUp({ 
+        email, 
+        password,
+        options: {
+          data: { handle: defaultHandle, display_name: defaultHandle }
+        }
+      });
       if (error) { alert(error.message); return; }
       currentUser = data.user;
       updateAuthUI();
@@ -419,9 +454,10 @@
           navUpload.className = 'text-sm font-medium text-gray-400 hover:text-white px-3 py-1.5 rounded transition auth-required';
           navProfile.className = 'text-sm font-medium text-gray-400 hover:text-white px-3 py-1.5 rounded transition auth-required';
         }
-        // Populate account settings form with current values
+        // Populate account settings form
         document.getElementById('accountEmail').value = currentUser.email || '';
         document.getElementById('accountName').value = currentUser.user_metadata?.display_name || '';
+        document.getElementById('accountHandle').value = currentUser.user_metadata?.handle || '';
       } else if (tabName === 'upload') {
         if (!currentUser) { openAuthModal(); return; }
         tabUpload.classList.remove('hidden');
@@ -439,6 +475,7 @@
 
       const newEmail = document.getElementById('accountEmail').value;
       const newName = document.getElementById('accountName').value;
+      let newHandle = document.getElementById('accountHandle').value.trim().toLowerCase().replace(/^@/, '').replace(/[^a-z0-9_]/g, '');
       const newPassword = document.getElementById('accountPassword').value;
 
       const updateBtn = document.getElementById('updateAccountBtn');
@@ -447,7 +484,10 @@
 
       try {
         const updatePayload = {
-          data: { display_name: newName }
+          data: { 
+            display_name: newName,
+            handle: newHandle 
+          }
         };
 
         if (newEmail !== currentUser.email) {
@@ -462,8 +502,15 @@
         if (error) throw error;
 
         currentUser = data.user;
+        
+        // Also update handle in user's existing posts so the feed displays the new handle immediately
+        await supabaseClient
+          .from('posts')
+          .update({ handle: newHandle })
+          .eq('user_id', currentUser.id);
+
         updateAuthUI();
-        document.getElementById('accountPassword').value = ''; // clear password field
+        document.getElementById('accountPassword').value = '';
         showToast('Account updated successfully!');
       } catch (err) {
         console.error("Account update error:", err);
@@ -538,9 +585,12 @@
           .from('photos')
           .getPublicUrl(filePath);
 
+        const userHandle = currentUser.user_metadata?.handle || currentUser.email.split('@')[0];
+
         const postData = {
           user_id: currentUser.id,
           user_email: currentUser.email,
+          handle: userHandle,
           title: document.getElementById('photoTitle').value,
           genre: document.getElementById('photoGenre').value,
           image_url: publicUrl,
@@ -607,9 +657,7 @@
 
       feedContainer.innerHTML = posts.map(post => {
         const isOwner = currentUser && currentUser.id === post.user_id;
-        const authorName = (post.user_email && typeof post.user_email === 'string') 
-          ? post.user_email.split('@')[0] 
-          : 'Artist';
+        const authorHandle = post.handle ? `@${post.handle}` : (post.user_email ? `@${post.user_email.split('@')[0]}` : '@artist');
 
         const postCritiques = critiques ? critiques.filter(c => c.post_id === post.id) : [];
         const canCritique = currentUser && !isOwner;
@@ -619,7 +667,7 @@
             <div class="px-6 py-4 flex items-center justify-between border-b border-charcoal-700/60">
               <div>
                 <h3 class="font-medium text-white">${escapeHtml(post.title || 'Untitled Work')}</h3>
-                <p class="text-xs text-gray-400">By <span class="text-gray-300 font-mono">${escapeHtml(authorName)}</span> &bull; <span class="text-gray-500">${escapeHtml(post.genre || 'General')}</span></p>
+                <p class="text-xs text-gray-400">By <span class="text-gray-300 font-mono">${escapeHtml(authorHandle)}</span> &bull; <span class="text-gray-500">${escapeHtml(post.genre || 'General')}</span></p>
               </div>
               <div class="flex items-center gap-3">
                 <span class="text-xs bg-charcoal-900 border border-charcoal-700 text-gray-400 px-2.5 py-1 rounded font-mono hidden sm:inline">Original Ratio</span>
@@ -767,7 +815,8 @@
       const profileContainer = document.getElementById('profileFeed');
       if (!currentUser) return;
 
-      document.getElementById('profileEmailDisplay').textContent = currentUser.email;
+      const userHandle = currentUser.user_metadata?.handle ? `@${currentUser.user_metadata.handle}` : `@${currentUser.email.split('@')[0]}`;
+      document.getElementById('profileHandleDisplay').textContent = userHandle;
       profileContainer.innerHTML = `<p class="text-center text-gray-500 py-20 font-light">Loading your portfolio...</p>`;
 
       const { data: posts, error } = await supabaseClient
