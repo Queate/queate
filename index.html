@@ -357,20 +357,28 @@
 
   </main>
 
-  <!-- COMPACT VIEW LIGHTBOX / PREVIEW MODAL -->
+  <!-- COMPACT VIEW LIGHTBOX / PREVIEW MODAL WITH CURATION & CRITIQUES -->
   <div id="compactModal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 hidden">
     <div class="bg-charcoal-800 border border-charcoal-700 max-w-2xl w-full rounded-lg overflow-hidden shadow-2xl relative max-h-[90vh] flex flex-col">
       <div class="px-4 py-3 bg-charcoal-900 border-b border-charcoal-700 flex items-center justify-between">
         <h3 id="modalTitle" class="font-medium text-white text-sm">Photograph Title</h3>
         <button onclick="closeCompactModal()" class="text-gray-400 hover:text-white text-sm">✕ Close</button>
       </div>
-      <div class="bg-black flex items-center justify-center p-2 flex-1 overflow-hidden">
-        <img id="modalImage" src="" alt="Enlarged View" class="max-h-[60vh] w-auto object-contain">
+      <div class="bg-black flex items-center justify-center p-2">
+        <img id="modalImage" src="" alt="Enlarged View" class="max-h-[50vh] w-auto object-contain">
       </div>
-      <div class="p-4 bg-charcoal-800 border-t border-charcoal-700 space-y-2 text-xs overflow-y-auto max-h-[30vh]">
+      <div class="p-4 bg-charcoal-800 border-t border-charcoal-700 space-y-4 text-xs overflow-y-auto max-h-[35vh]">
         <p class="text-gray-300 font-mono">By <span id="modalAuthorContainer"></span> &bull; Genre: <span id="modalGenre" class="text-gray-400"></span></p>
         <div id="modalCaptionContainer" class="text-gray-200 font-sans leading-relaxed"></div>
         <div id="modalExif" class="grid grid-cols-2 sm:grid-cols-3 gap-2 font-mono text-[11px] text-gray-400 pt-2 border-t border-charcoal-700/60"></div>
+        
+        <!-- Modal Curation / Critiques Section -->
+        <div id="modalCritiqueWrapper" class="pt-2 border-t border-charcoal-700/60 space-y-4">
+          <h4 class="text-xs uppercase tracking-wider text-gray-400 font-mono">Artistic & Technical Critiques</h4>
+          <div id="modalCritiquesList" class="space-y-3"></div>
+
+          <div id="modalCritiqueFormArea"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -427,6 +435,7 @@
     let globalSearchQuery = '';
     let viewingProfileHandle = null; 
     let galleryViewMode = 'full';
+    let allCritiquesCache = [];
 
     const GENRES_LIST = [
       "Abstract", "Analog / Film", "Architecture", "Astro & Night", 
@@ -952,6 +961,8 @@
         .in('post_id', postIds)
         .order('created_at', { ascending: false });
 
+      allCritiquesCache = critiques || [];
+
       if (galleryViewMode === 'compact') {
         feedContainer.className = "grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4";
         feedContainer.innerHTML = filteredPosts.map(post => {
@@ -994,7 +1005,7 @@
           ? `<img src="${escapeHtml(post.avatar_url)}" class="w-8 h-8 rounded-full object-cover border border-charcoal-700">` 
           : `<div class="w-8 h-8 rounded-full bg-charcoal-700 text-gray-300 text-[10px] flex items-center justify-center font-mono">${authorHandle.substring(1, 3).toUpperCase()}</div>`;
 
-        const postCritiques = critiques ? critiques.filter(c => c.post_id === post.id) : [];
+        const postCritiques = allCritiquesCache.filter(c => c.post_id === post.id);
 
         let captionHtml = '';
         if (post.caption) {
@@ -1241,11 +1252,143 @@
       if (iso) exifHtml += `<div>ISO: ${iso}</div>`;
       exifContainer.innerHTML = exifHtml || '<div class="text-gray-500">No EXIF data recorded.</div>';
 
+      // Render Modal Critiques
+      const modalCritiquesList = document.getElementById('modalCritiquesList');
+      const modalCritiqueFormArea = document.getElementById('modalCritiqueFormArea');
+      
+      const postCritiques = allCritiquesCache.filter(c => c.post_id === postId);
+
+      if (postCritiques.length === 0) {
+        modalCritiquesList.innerHTML = `<p class="text-xs text-gray-500 italic">No critiques submitted yet. Be the first to offer constructive feedback.</p>`;
+      } else {
+        modalCritiquesList.innerHTML = postCritiques.map(c => {
+          const isCritiqueOwner = currentUser && currentUser.id === c.user_id;
+          const isPostOwner = currentUser && currentUser.id === c.user_id; // approximate check or allow deletion
+          const critiqueHandle = c.user_email ? ('@' + c.user_email.split('@')[0]) : '@artist';
+
+          return `
+            <div class="bg-charcoal-900 border border-charcoal-700/80 p-3 rounded text-xs space-y-1.5">
+              <div class="flex items-center justify-between text-gray-400 font-mono text-[11px]">
+                <span>By <span onclick="closeCompactModal(); viewUserProfile('${escapeHtml(critiqueHandle)}')" class="text-gray-300 hover:underline cursor-pointer">${escapeHtml(critiqueHandle)}</span></span>
+                <div class="flex items-center gap-3">
+                  <div class="flex gap-2">
+                    <span>Comp: <strong>${c.composition_score}/5</strong></span>
+                    <span>Light: <strong>${c.lighting_score}/5</strong></span>
+                    <span>Tech: <strong>${c.technical_score}/5</strong></span>
+                  </div>
+                  ${isCritiqueOwner ? `
+                    <button onclick="deleteCritiqueFromModal('${c.id}', '${postId}', '${imgUrl}', '${title}', '${handle}', '${genre}', '${escapeHtml(caption)}', '${camera}', '${lens}', '${focal}', '${aperture}', '${shutter}', '${iso}')" title="Delete Critique" class="text-gray-400 hover:text-red-400">✕</button>
+                  ` : ''}
+                </div>
+              </div>
+              <p class="text-gray-200 leading-relaxed font-sans">${escapeHtml(c.feedback_text)}</p>
+            </div>
+          `;
+        }).join('');
+      }
+
+      if (currentUser) {
+        modalCritiqueFormArea.innerHTML = `
+          <div class="bg-charcoal-900 border border-charcoal-700 p-3 rounded space-y-3 mt-2">
+            <p class="text-[11px] font-mono text-gray-300 uppercase">Leave Structured Critique</p>
+            <div class="grid grid-cols-3 gap-2 text-[11px]">
+              <div>
+                <label class="block text-gray-400 mb-0.5">Comp (1-5)</label>
+                <select id="modalComp_${postId}" class="w-full bg-charcoal-800 border border-charcoal-700 rounded p-1 text-white">
+                  <option value="5">5</option><option value="4">4</option><option value="3" selected>3</option><option value="2">2</option><option value="1">1</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-gray-400 mb-0.5">Light (1-5)</label>
+                <select id="modalLight_${postId}" class="w-full bg-charcoal-800 border border-charcoal-700 rounded p-1 text-white">
+                  <option value="5">5</option><option value="4">4</option><option value="3" selected>3</option><option value="2">2</option><option value="1">1</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-gray-400 mb-0.5">Tech (1-5)</label>
+                <select id="modalTech_${postId}" class="w-full bg-charcoal-800 border border-charcoal-700 rounded p-1 text-white">
+                  <option value="5">5</option><option value="4">4</option><option value="3" selected>3</option><option value="2">2</option><option value="1">1</option>
+                </select>
+              </div>
+            </div>
+            <div>
+              <textarea id="modalCritiqueText_${postId}" rows="2" placeholder="Write constructive feedback..." class="w-full bg-charcoal-800 border border-charcoal-700 rounded p-2 text-xs text-white focus:outline-none focus:border-gray-500"></textarea>
+            </div>
+            <button onclick="submitModalCritique('${postId}', '${imgUrl}', '${title}', '${handle}', '${genre}', '${escapeHtml(caption)}', '${camera}', '${lens}', '${focal}', '${aperture}', '${shutter}', '${iso}')" class="bg-white text-charcoal-900 font-semibold px-3 py-1.5 rounded text-xs hover:bg-gray-200 transition">
+              Submit Critique
+            </button>
+          </div>
+        `;
+      } else {
+        modalCritiqueFormArea.innerHTML = `
+          <div class="p-3 text-center text-gray-400 text-xs">
+            Please <button onclick="openAuthModal()" class="text-white underline font-medium">sign in</button> to leave a critique.
+          </div>
+        `;
+      }
+
       document.getElementById('compactModal').classList.remove('hidden');
     }
 
     function closeCompactModal() {
       document.getElementById('compactModal').classList.add('hidden');
+    }
+
+    async function submitModalCritique(postId, imgUrl, title, handle, genre, caption, camera, lens, focal, aperture, shutter, iso) {
+      if (!currentUser) return;
+      const comp = document.getElementById(`modalComp_${postId}`).value;
+      const light = document.getElementById(`modalLight_${postId}`).value;
+      const tech = document.getElementById(`modalTech_${postId}`).value;
+      const text = document.getElementById(`modalCritiqueText_${postId}`).value;
+
+      if (!text.trim()) {
+        alert("Please provide some written constructive feedback.");
+        return;
+      }
+
+      try {
+        const { error } = await supabaseClient.from('critiques').insert([{
+          post_id: postId,
+          user_id: currentUser.id,
+          user_email: currentUser.email,
+          composition_score: parseInt(comp),
+          lighting_score: parseInt(light),
+          technical_score: parseInt(tech),
+          feedback_text: text
+        }]);
+
+        if (error) throw error;
+        showToast('Critique submitted successfully.');
+
+        // Refresh cache
+        const { data: critiques } = await supabaseClient.from('critiques').select('*');
+        allCritiquesCache = critiques || [];
+
+        openCompactModal(postId, imgUrl, title, handle, genre, caption, camera, lens, focal, aperture, shutter, iso);
+        loadFeed();
+      } catch (err) {
+        console.error("Critique error:", err);
+        alert("Failed to submit critique: " + err.message);
+      }
+    }
+
+    async function deleteCritiqueFromModal(critiqueId, postId, imgUrl, title, handle, genre, caption, camera, lens, focal, aperture, shutter, iso) {
+      if (!confirm("Are you sure you want to delete this critique?")) return;
+
+      try {
+        const { error } = await supabaseClient.from('critiques').delete().eq('id', critiqueId);
+        if (error) throw error;
+        showToast('Critique deleted successfully.');
+
+        const { data: critiques } = await supabaseClient.from('critiques').select('*');
+        allCritiquesCache = critiques || [];
+
+        openCompactModal(postId, imgUrl, title, handle, genre, caption, camera, lens, focal, aperture, shutter, iso);
+        loadFeed();
+      } catch (err) {
+        console.error("Error deleting critique:", err);
+        alert("Failed to delete critique: " + err.message);
+      }
     }
 
     function toggleCaption(postIdKey) {
