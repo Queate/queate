@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Queate — The Art & Craft of Photography</title>
+  <title>Queate — Where the quest for creation becomes curation</title>
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -44,21 +44,28 @@
 
   <!-- Top Navigation Bar -->
   <header class="sticky top-0 z-50 bg-charcoal-900/90 backdrop-blur-md border-b border-charcoal-700">
-    <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+    <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
       
-      <!-- Brand Logo / Name -->
-      <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('feed')">
-        <div class="w-9 h-9 bg-white text-charcoal-900 font-bold text-xl flex items-center justify-center rounded-sm tracking-tighter">
-          Q
+      <!-- Brand Logo / Name & Global Header Search Bar -->
+      <div class="flex items-center gap-6 flex-1 max-w-xl">
+        <div class="flex items-center gap-3 cursor-pointer flex-shrink-0" onclick="switchTab('feed')">
+          <div class="w-9 h-9 bg-white text-charcoal-900 font-bold text-xl flex items-center justify-center rounded-sm tracking-tighter">
+            Q
+          </div>
+          <div>
+            <span class="text-xl font-medium tracking-tight editorial-font italic">Queate</span>
+            <span class="text-[10px] text-gray-400 block -mt-1 uppercase tracking-widest font-mono">/kwiː-eɪt/</span>
+          </div>
         </div>
-        <div>
-          <span class="text-xl font-medium tracking-tight editorial-font italic">Queate</span>
-          <span class="text-xs text-gray-400 block -mt-1 uppercase tracking-widest font-mono">/kwiː-eɪt/</span>
+
+        <!-- Header Search Bar -->
+        <div class="relative flex-1 hidden sm:block">
+          <input type="text" id="headerSearchInput" oninput="handleHeaderSearch(this.value)" placeholder="Search @handle, title, or genre..." class="w-full bg-charcoal-800 border border-charcoal-700 rounded px-3 py-1.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-gray-500 font-mono">
         </div>
       </div>
 
       <!-- Navigation Links & Actions -->
-      <div class="flex items-center gap-3 sm:gap-4">
+      <div class="flex items-center gap-3 sm:gap-4 flex-shrink-0">
         <button onclick="switchTab('feed')" id="navFeed" class="text-sm font-medium text-white px-3 py-1.5 rounded bg-charcoal-700 transition">Gallery</button>
         <button onclick="switchTab('upload')" id="navUpload" class="text-sm font-medium text-gray-400 hover:text-white px-3 py-1.5 rounded transition hidden auth-required">+ Publish Work</button>
         
@@ -158,14 +165,10 @@
         </div>
       </div>
 
-      <!-- Profile Grid Controls: Search Bar & Genre Filter -->
+      <!-- Profile Grid Controls: Genre Filter Bar -->
       <div class="flex flex-col sm:flex-row items-center justify-between border-b border-charcoal-800 pb-3 gap-4">
         <div class="flex items-center gap-3 w-full sm:w-auto">
-          <span class="text-xs font-mono uppercase tracking-widest text-white whitespace-nowrap">Portfolio</span>
-          <!-- Handle Search Bar -->
-          <div class="relative flex-1 sm:w-64">
-            <input type="text" id="profileSearchInput" oninput="filterProfileSearch(this.value)" placeholder="Search @handle or title..." class="w-full bg-charcoal-800 border border-charcoal-700 rounded px-3 py-1.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-gray-500 font-mono">
-          </div>
+          <span class="text-xs font-mono uppercase tracking-widest text-white whitespace-nowrap">Portfolio Stream</span>
         </div>
         
         <!-- Profile Genre Filter Dropdown -->
@@ -397,7 +400,7 @@
 
   <!-- Footer -->
   <footer class="border-t border-charcoal-800 py-8 text-center text-xs text-gray-500 mt-16">
-    <p class="editorial-font italic text-gray-400 text-sm mb-1">"The Art & Craft of Photography"</p>
+    <p class="editorial-font italic text-gray-400 text-sm mb-1">"Where the quest for creation becomes curation"</p>
     <p>Queate &copy; 2026 &bull; Ad-free &bull; Algorithm-free</p>
   </footer>
 
@@ -413,8 +416,8 @@
     let previewUrl = null;
     let currentGenreFilter = 'All';
     let currentProfileGenreFilter = 'All';
-    let currentProfileSearchQuery = '';
-    let viewingProfileHandle = null; // null means viewing own profile or selected profile handle
+    let globalSearchQuery = '';
+    let viewingProfileHandle = null; 
     let galleryViewMode = 'full';
 
     const GENRES_LIST = [
@@ -905,7 +908,28 @@
         return;
       }
 
-      const postIds = posts.map(p => p.id);
+      // Filter based on global search bar query if present
+      let filteredPosts = posts;
+      if (globalSearchQuery.trim() !== '') {
+        const q = globalSearchQuery.toLowerCase();
+        filteredPosts = filteredPosts.filter(p => 
+          (p.title && p.title.toLowerCase().includes(q)) || 
+          (p.handle && p.handle.toLowerCase().includes(q)) ||
+          (p.genre && p.genre.toLowerCase().includes(q)) ||
+          (p.caption && p.caption.toLowerCase().includes(q))
+        );
+      }
+
+      if (filteredPosts.length === 0) {
+        feedContainer.innerHTML = `
+          <div class="text-center py-24 space-y-3">
+            <p class="text-gray-400 editorial-font italic text-xl">No photographs found matching "${escapeHtml(globalSearchQuery)}".</p>
+            <p class="text-xs text-gray-500 uppercase tracking-widest font-mono">Try searching for a different handle, title, or genre.</p>
+          </div>`;
+        return;
+      }
+
+      const postIds = filteredPosts.map(p => p.id);
       const { data: critiques } = await supabaseClient
         .from('critiques')
         .select('*')
@@ -914,7 +938,7 @@
 
       if (galleryViewMode === 'compact') {
         feedContainer.className = "grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4";
-        feedContainer.innerHTML = posts.map(post => {
+        feedContainer.innerHTML = filteredPosts.map(post => {
           const authorHandle = post.handle ? `@${post.handle}` : '@artist';
           
           const safeTitle = escapeHtml(post.title || 'Untitled').replace(/'/g, "\\'");
@@ -947,7 +971,7 @@
       }
 
       feedContainer.className = "space-y-16";
-      feedContainer.innerHTML = posts.map(post => {
+      feedContainer.innerHTML = filteredPosts.map(post => {
         const isOwner = currentUser && currentUser.id === post.user_id;
         const authorHandle = post.handle ? `@${post.handle}` : '@artist';
         const avatarImg = post.avatar_url 
@@ -1233,7 +1257,6 @@
 
     async function loadProfileFeed() {
       const profileContainer = document.getElementById('profileFeed');
-      const isViewingOther = viewingProfileHandle !== null;
       const targetHandle = viewingProfileHandle || (currentUser ? (currentUser.user_metadata?.handle || ('@' + currentUser.email.split('@')[0])) : null);
 
       if (!targetHandle) {
@@ -1262,7 +1285,6 @@
         return;
       }
 
-      // Fetch sample post metadata for profile header if viewing someone else
       let profileName = "Artist";
       let profileBio = "Photographer portfolio";
       let profileAvatar = "";
@@ -1299,14 +1321,14 @@
         avatarBox.innerHTML = `<span class="text-xs text-gray-500 font-mono">Avatar</span>`;
       }
 
-      // Apply search query filter if typed in profile search input
       let filteredPosts = posts || [];
-      if (currentProfileSearchQuery.trim() !== '') {
-        const q = currentProfileSearchQuery.toLowerCase();
+      if (globalSearchQuery.trim() !== '') {
+        const q = globalSearchQuery.toLowerCase();
         filteredPosts = filteredPosts.filter(p => 
           (p.title && p.title.toLowerCase().includes(q)) || 
           (p.handle && p.handle.toLowerCase().includes(q)) ||
-          (p.genre && p.genre.toLowerCase().includes(q))
+          (p.genre && p.genre.toLowerCase().includes(q)) ||
+          (p.caption && p.caption.toLowerCase().includes(q))
         );
       }
 
@@ -1524,9 +1546,14 @@
       loadProfileFeed();
     }
 
-    function filterProfileSearch(query) {
-      currentProfileSearchQuery = query;
-      loadProfileFeed();
+    function handleHeaderSearch(query) {
+      globalSearchQuery = query;
+      const activeTab = document.getElementById('tabProfile').classList.contains('hidden') ? 'feed' : 'profile';
+      if (activeTab === 'feed') {
+        loadFeed();
+      } else {
+        loadProfileFeed();
+      }
     }
 
     function showToast(message) {
