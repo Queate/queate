@@ -62,7 +62,7 @@
         <button onclick="switchTab('feed')" id="navFeed" class="text-sm font-medium text-white px-3 py-1.5 rounded bg-charcoal-700 transition">Gallery</button>
         <button onclick="switchTab('upload')" id="navUpload" class="text-sm font-medium text-gray-400 hover:text-white px-3 py-1.5 rounded transition hidden auth-required">+ Publish Work</button>
         
-        <!-- Auth / Instagram-style Nav Profile Button -->
+        <!-- Auth / Nav Profile Button -->
         <div id="authContainer">
           <button onclick="openAuthModal()" class="text-xs uppercase tracking-wider font-semibold bg-white text-charcoal-900 px-4 py-2 rounded hover:bg-gray-200 transition">
             Sign In
@@ -115,36 +115,52 @@
 
     </div>
 
-    <!-- PROFILE PORTFOLIO TAB (Instagram Style) -->
+    <!-- PROFILE PORTFOLIO TAB -->
     <div id="tabProfile" class="hidden space-y-10 max-w-3xl mx-auto">
       
-      <!-- Instagram Header Section -->
+      <!-- Profile Header Section -->
       <div class="flex flex-col sm:flex-row items-center sm:items-start gap-8 border-b border-charcoal-700 pb-8">
         
-        <!-- Large Avatar with story ring -->
+        <!-- Avatar without gradient circle -->
         <div class="relative group">
-          <div class="w-24 h-24 sm:w-32 sm:h-32 rounded-full p-1 bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 flex-shrink-0">
-            <div id="profileAvatarBox" class="w-full h-full rounded-full bg-charcoal-900 overflow-hidden flex items-center justify-center border-2 border-charcoal-900">
+          <div class="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-charcoal-800 border border-charcoal-700 overflow-hidden flex items-center justify-center flex-shrink-0 shadow-lg">
+            <div id="profileAvatarBox" class="w-full h-full flex items-center justify-center">
               <span class="text-xs text-gray-500 font-mono">Avatar</span>
             </div>
           </div>
-          <label class="absolute inset-0 rounded-full cursor-pointer flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition text-[11px] font-medium text-white">
+          <label class="absolute inset-0 rounded-full cursor-pointer flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition text-[11px] font-medium text-white">
             Change Photo
             <input type="file" accept="image/jpeg,image/png" onchange="handleAvatarUpload(event)" class="hidden">
           </label>
         </div>
 
         <!-- Profile Bio & Stats -->
-        <div class="flex-1 space-y-4 text-center sm:text-left">
+        <div class="flex-1 space-y-4 text-center sm:text-left w-full">
           <div class="flex flex-col sm:flex-row sm:items-center gap-4">
             <h2 id="profileHandleDisplay" class="text-xl font-medium tracking-tight font-mono text-white">@handle</h2>
             <div class="flex items-center justify-center gap-2">
-              <label class="cursor-pointer bg-charcoal-800 hover:bg-charcoal-700 border border-charcoal-700 text-xs font-medium text-white px-4 py-1.5 rounded-lg transition">
-                <span>Edit Profile</span>
-                <input type="file" accept="image/jpeg,image/png" onchange="handleAvatarUpload(event)" class="hidden">
-              </label>
+              <button onclick="toggleEditProfileDrawer()" class="bg-charcoal-800 hover:bg-charcoal-700 border border-charcoal-700 text-xs font-medium text-white px-4 py-1.5 rounded-lg transition">
+                Edit Profile
+              </button>
               <button onclick="handleSignOut()" class="bg-charcoal-800 hover:bg-charcoal-700 border border-charcoal-700 text-xs font-medium text-gray-300 px-3 py-1.5 rounded-lg transition">Sign Out</button>
             </div>
+          </div>
+
+          <!-- Edit Profile Inline Drawer -->
+          <div id="editProfileDrawer" class="hidden bg-charcoal-800 border border-charcoal-700 p-4 rounded-lg space-y-3 text-left">
+            <div class="flex items-center justify-between border-b border-charcoal-700 pb-2">
+              <span class="text-xs font-mono text-gray-300 uppercase">Edit Profile Details</span>
+              <button onclick="toggleEditProfileDrawer()" class="text-gray-400 hover:text-white text-xs">✕</button>
+            </div>
+            <div>
+              <label class="block text-[10px] text-gray-400 uppercase font-mono mb-1">Name / Title</label>
+              <input type="text" id="inputProfileName" placeholder="e.g. Justin | Photography" class="w-full bg-charcoal-900 border border-charcoal-700 rounded px-2.5 py-1.5 text-xs text-white">
+            </div>
+            <div>
+              <label class="block text-[10px] text-gray-400 uppercase font-mono mb-1">Bio / Details</label>
+              <textarea id="inputProfileBio" rows="2" placeholder="Sydney, Australia based..." class="w-full bg-charcoal-900 border border-charcoal-700 rounded px-2.5 py-1.5 text-xs text-white"></textarea>
+            </div>
+            <button onclick="saveProfileDetails()" class="bg-white text-charcoal-900 font-semibold px-3 py-1.5 rounded text-xs hover:bg-gray-200 transition">Save Profile</button>
           </div>
 
           <!-- Stats Counter Row -->
@@ -156,8 +172,8 @@
 
           <!-- Bio Section -->
           <div class="text-xs sm:text-sm text-gray-300 space-y-1 font-sans">
-            <p class="font-medium text-white">Justin | Photography</p>
-            <p class="text-gray-400">Sydney, Australia based &bull; Fine art & uncropped visual storytelling.</p>
+            <p id="profileTitleDisplay" class="font-medium text-white">Justin | Photography</p>
+            <p id="profileBioDisplay" class="text-gray-400">Sydney, Australia based &bull; Fine art & uncropped visual storytelling.</p>
           </div>
         </div>
 
@@ -355,15 +371,13 @@
         const avatarUrl = currentUser.user_metadata?.avatar_url;
 
         let avatarHtml = avatarUrl 
-          ? `<img src="${escapeHtml(avatarUrl)}" class="w-8 h-8 rounded-full object-cover border border-charcoal-600">`
-          : `<div class="w-8 h-8 rounded-full bg-charcoal-700 text-gray-300 text-[10px] flex items-center justify-center font-mono">${userHandle.substring(1, 3).toUpperCase()}</div>`;
+          ? `<img src="${escapeHtml(avatarUrl)}" class="w-7 h-7 rounded-full object-cover border border-charcoal-600">`
+          : `<div class="w-7 h-7 rounded-full bg-charcoal-700 text-gray-300 text-[10px] flex items-center justify-center font-mono">${userHandle.substring(1, 3).toUpperCase()}</div>`;
 
         authContainer.innerHTML = `
           <div class="flex items-center gap-3">
             <button onclick="switchTab('profile')" title="View Profile" class="flex items-center gap-2 text-xs text-gray-200 hover:text-white font-mono bg-charcoal-800 border border-charcoal-700 px-3 py-1.5 rounded-full transition shadow-sm">
-              <div class="p-0.5 rounded-full bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600">
-                ${avatarHtml}
-              </div>
+              ${avatarHtml}
               <span class="font-medium">${userHandle}</span>
             </button>
           </div>
@@ -403,7 +417,7 @@
         email, 
         password,
         options: {
-          data: { handle: defaultHandle, display_name: defaultHandle }
+          data: { handle: defaultHandle, display_name: "Justin | Photography", bio: "Sydney, Australia based • Fine art & uncropped visual storytelling." }
         }
       });
       if (error) { alert(error.message); return; }
@@ -457,6 +471,41 @@
         if (!currentUser) { openAuthModal(); return; }
         tabUpload.classList.remove('hidden');
         navUpload.className = 'text-sm font-medium text-white px-3 py-1.5 rounded bg-charcoal-700 transition';
+      }
+    }
+
+    function toggleEditProfileDrawer() {
+      const drawer = document.getElementById('editProfileDrawer');
+      if (drawer) {
+        drawer.classList.toggle('hidden');
+        if (!drawer.classList.contains('hidden') && currentUser) {
+          document.getElementById('inputProfileName').value = currentUser.user_metadata?.display_name || 'Justin | Photography';
+          document.getElementById('inputProfileBio').value = currentUser.user_metadata?.bio || 'Sydney, Australia based • Fine art & uncropped visual storytelling.';
+        }
+      }
+    }
+
+    async function saveProfileDetails() {
+      if (!currentUser) return;
+      const newName = document.getElementById('inputProfileName').value;
+      const newBio = document.getElementById('inputProfileBio').value;
+
+      try {
+        const metadata = currentUser.user_metadata || {};
+        const { data, error } = await supabaseClient.auth.updateUser({
+          data: { ...metadata, display_name: newName, bio: newBio }
+        });
+
+        if (error) throw error;
+        currentUser = data.user;
+
+        document.getElementById('profileTitleDisplay').textContent = newName;
+        document.getElementById('profileBioDisplay').textContent = newBio;
+        toggleEditProfileDrawer();
+        showToast('Profile details updated successfully!');
+      } catch (err) {
+        console.error("Error updating profile:", err);
+        alert("Failed to update profile: " + err.message);
       }
     }
 
@@ -730,7 +779,6 @@
               <img src="${escapeHtml(post.image_url)}" alt="${escapeHtml(post.title || 'Photograph')}" class="max-h-[85vh] w-auto object-contain">
             </div>
 
-            <!-- Caption & EXIF Drawer & Actions -->
             <div class="px-6 py-4 bg-charcoal-800/90 border-t border-charcoal-700/60 space-y-3">
               ${post.caption ? `<p class="text-xs text-gray-200 leading-relaxed font-sans">${escapeHtml(post.caption)}</p>` : ''}
               
@@ -858,8 +906,12 @@
 
       const userHandle = currentUser.user_metadata?.handle || ('@' + currentUser.email.split('@')[0]);
       const avatarUrl = currentUser.user_metadata?.avatar_url;
+      const displayName = currentUser.user_metadata?.display_name || 'Justin | Photography';
+      const bioText = currentUser.user_metadata?.bio || 'Sydney, Australia based • Fine art & uncropped visual storytelling.';
 
       document.getElementById('profileHandleDisplay').textContent = userHandle;
+      document.getElementById('profileTitleDisplay').textContent = displayName;
+      document.getElementById('profileBioDisplay').textContent = bioText;
       
       const avatarBox = document.getElementById('profileAvatarBox');
       if (avatarUrl) {
