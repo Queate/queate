@@ -46,27 +46,27 @@
   <header class="sticky top-0 z-50 bg-charcoal-900/90 backdrop-blur-md border-b border-charcoal-700">
     <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
       
-      <!-- Brand Logo / Name & Global Header Search Bar -->
-      <div class="flex items-center gap-6 flex-1 max-w-xl">
-        <div class="flex items-center gap-3 cursor-pointer flex-shrink-0" onclick="switchTab('feed')">
-          <div class="w-9 h-9 bg-white text-charcoal-900 font-bold text-xl flex items-center justify-center rounded-sm tracking-tighter">
-            Q
-          </div>
-          <div>
-            <span class="text-xl font-medium tracking-tight editorial-font italic">Queate</span>
-            <span class="text-[10px] text-gray-400 block -mt-1 uppercase tracking-widest font-mono">/kwiː-eɪt/</span>
-          </div>
+      <!-- Brand Logo / Name -->
+      <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('feed')">
+        <div class="w-9 h-9 bg-white text-charcoal-900 font-bold text-xl flex items-center justify-center rounded-sm tracking-tighter">
+          Q
         </div>
-
-        <!-- Header Search Bar -->
-        <div class="relative flex-1 hidden sm:block">
-          <input type="text" id="headerSearchInput" oninput="handleHeaderSearch(this.value)" placeholder="Search @handle, title, or genre..." class="w-full bg-charcoal-800 border border-charcoal-700 rounded px-3 py-1.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-gray-500 font-mono">
+        <div>
+          <span class="text-xl font-medium tracking-tight editorial-font italic">Queate</span>
+          <span class="text-[10px] text-gray-400 block -mt-1 uppercase tracking-widest font-mono">/kwiː-eɪt/</span>
         </div>
       </div>
 
       <!-- Navigation Links & Actions -->
-      <div class="flex items-center gap-3 sm:gap-4 flex-shrink-0">
-        <button onclick="switchTab('feed')" id="navFeed" class="text-sm font-medium text-white px-3 py-1.5 rounded bg-charcoal-700 transition">Gallery</button>
+      <div class="flex items-center gap-3 sm:gap-4">
+        <!-- Gallery with Magnifying Glass Toggle -->
+        <div class="flex items-center gap-1.5">
+          <button onclick="switchTab('feed')" id="navFeed" class="text-sm font-medium text-white px-3 py-1.5 rounded bg-charcoal-700 transition">Gallery</button>
+          <button onclick="toggleSearchBox(event)" title="Search photographs" class="text-gray-400 hover:text-white p-2 rounded transition bg-charcoal-800 border border-charcoal-700">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+          </button>
+        </div>
+
         <button onclick="switchTab('upload')" id="navUpload" class="text-sm font-medium text-gray-400 hover:text-white px-3 py-1.5 rounded transition hidden auth-required">+ Publish Work</button>
         
         <!-- Auth / Dropdown Menu Container -->
@@ -77,6 +77,14 @@
         </div>
       </div>
 
+    </div>
+
+    <!-- Collapsible Search Bar Drawer -->
+    <div id="searchDrawer" class="hidden bg-charcoal-900 border-t border-charcoal-700 px-4 py-3">
+      <div class="max-w-xl mx-auto relative flex items-center">
+        <input type="text" id="headerSearchInput" oninput="handleHeaderSearch(this.value)" placeholder="Search by keyword, title, genre, or @handle..." class="w-full bg-charcoal-800 border border-charcoal-700 rounded-lg px-3.5 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-gray-500 font-mono pr-8">
+        <button onclick="toggleSearchBox(event)" class="absolute right-3 text-gray-400 hover:text-white text-xs font-mono">✕</button>
+      </div>
     </div>
   </header>
 
@@ -519,6 +527,15 @@
       }
     }
 
+    function toggleSearchBox(e) {
+      e.stopPropagation();
+      const drawer = document.getElementById('searchDrawer');
+      drawer.classList.toggle('hidden');
+      if (!drawer.classList.contains('hidden')) {
+        document.getElementById('headerSearchInput').focus();
+      }
+    }
+
     function openAuthModal() { document.getElementById('authModal').classList.remove('hidden'); }
     function closeAuthModal() { document.getElementById('authModal').classList.add('hidden'); }
 
@@ -908,7 +925,6 @@
         return;
       }
 
-      // Filter based on global search bar query if present
       let filteredPosts = posts;
       if (globalSearchQuery.trim() !== '') {
         const q = globalSearchQuery.toLowerCase();
@@ -924,7 +940,7 @@
         feedContainer.innerHTML = `
           <div class="text-center py-24 space-y-3">
             <p class="text-gray-400 editorial-font italic text-xl">No photographs found matching "${escapeHtml(globalSearchQuery)}".</p>
-            <p class="text-xs text-gray-500 uppercase tracking-widest font-mono">Try searching for a different handle, title, or genre.</p>
+            <p class="text-xs text-gray-500 uppercase tracking-widest font-mono">Try searching for a different handle, title, or keyword.</p>
           </div>`;
         return;
       }
