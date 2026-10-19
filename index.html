@@ -389,7 +389,6 @@
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJsamhqcWFxeHpqZmpjcGt3YXh5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzMDUwNTAsImV4cCI6MjEwNzg4MTA1MH0.ZqPWN1GWmnbU677e8b4_1goXtm5S0dzf7g-UC6jDOzg';
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    
     let currentUser = null;
     let selectedFile = null;
     let previewUrl = null;
@@ -779,12 +778,13 @@
 
         const userHandle = currentUser.user_metadata?.handle || ('@' + currentUser.email.split('@')[0]);
         const cleanHandle = userHandle.startsWith('@') ? userHandle.substring(1) : userHandle;
+        const displayName = currentUser.user_metadata?.display_name || cleanHandle;
         const userAvatar = currentUser.user_metadata?.avatar_url || '';
 
         const postData = {
           user_id: currentUser.id,
-          user_email: currentUser.email,
           handle: cleanHandle,
+          author_name: displayName,
           avatar_url: userAvatar,
           title: document.getElementById('photoTitle').value,
           genre: document.getElementById('photoGenre').value,
@@ -854,7 +854,7 @@
       if (galleryViewMode === 'compact') {
         feedContainer.className = "grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4";
         feedContainer.innerHTML = posts.map(post => {
-          const authorHandle = post.handle ? `@${post.handle}` : (post.user_email ? `@${post.user_email.split('@')[0]}` : '@artist');
+          const authorHandle = post.handle ? `@${post.handle}` : '@artist';
           return `
             <div class="relative group aspect-square bg-charcoal-800 border border-charcoal-700 rounded-lg overflow-hidden shadow-md flex flex-col">
               <div class="flex-1 overflow-hidden relative">
@@ -873,7 +873,7 @@
       feedContainer.className = "space-y-16";
       feedContainer.innerHTML = posts.map(post => {
         const isOwner = currentUser && currentUser.id === post.user_id;
-        const authorHandle = post.handle ? `@${post.handle}` : (post.user_email ? `@${post.user_email.split('@')[0]}` : '@artist');
+        const authorHandle = post.handle ? `@${post.handle}` : '@artist';
         const avatarImg = post.avatar_url 
           ? `<img src="${escapeHtml(post.avatar_url)}" class="w-8 h-8 rounded-full object-cover border border-charcoal-700">` 
           : `<div class="w-8 h-8 rounded-full bg-charcoal-700 text-gray-300 text-[10px] flex items-center justify-center font-mono">${authorHandle.substring(1, 3).toUpperCase()}</div>`;
@@ -1000,7 +1000,7 @@
                     return `
                       <div class="bg-charcoal-800 border border-charcoal-700/80 p-4 rounded text-xs space-y-2">
                         <div class="flex items-center justify-between text-gray-400 font-mono">
-                          <span>By ${escapeHtml(c.user_email.split('@')[0])}</span>
+                          <span>By ${escapeHtml(c.user_email ? c.user_email.split('@')[0] : 'artist')}</span>
                           <div class="flex items-center gap-4">
                             <div class="flex gap-3">
                               <span>Comp: <strong>${c.composition_score}/5</strong></span>
@@ -1222,6 +1222,62 @@
       const section = document.getElementById(`critiqueSection_${postId}`);
       if (section) {
         section.classList.toggle('hidden');
+      }
+    }
+
+    async function submitCritique(postId) {
+      if (!currentUser) {
+        openAuthModal();
+        return;
+      }
+
+      const comp = document.getElementById(`compScore_${postId}`).value;
+      const light = document.getElementById(`lightScore_${postId}`).value;
+      const tech = document.getElementById(`techScore_${postId}`).value;
+      const text = document.getElementById(`critiqueText_${postId}`).value;
+
+      if (!text.trim()) {
+        alert("Please provide some written constructive feedback.");
+        return;
+      }
+
+      try {
+        const { error } = await supabaseClient.from('critiques').insert([{
+          post_id: postId,
+          user_id: currentUser.id,
+          user_email: currentUser.email,
+          composition_score: parseInt(comp),
+          lighting_score: parseInt(light),
+          technical_score: parseInt(tech),
+          feedback_text: text
+        }]);
+
+        if (error) throw error;
+
+        showToast('Critique submitted successfully.');
+        loadFeed();
+      } catch (err) {
+        console.error("Critique error:", err);
+        alert("Failed to submit critique: " + err.message);
+      }
+    }
+
+    async function deleteCritique(critiqueId) {
+      if (!confirm("Are you sure you want to delete this critique?")) return;
+
+      try {
+        const { error } = await supabaseClient
+          .from('critiques')
+          .delete()
+          .eq('id', critiqueId);
+
+        if (error) throw error;
+
+        showToast('Critique deleted successfully.');
+        loadFeed();
+      } catch (err) {
+        console.error("Error deleting critique:", err);
+        alert("Failed to delete critique: " + err.message);
       }
     }
 
