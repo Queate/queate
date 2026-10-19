@@ -128,7 +128,6 @@
               <span class="text-xs text-gray-500 font-mono">Avatar</span>
             </div>
           </div>
-          <!-- Hidden File Input for Avatar Upload -->
           <label class="absolute inset-0 rounded-full cursor-pointer flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition text-[11px] font-medium text-white">
             Change Photo
             <input type="file" accept="image/jpeg,image/png" onchange="handleAvatarUpload(event)" class="hidden">
@@ -214,6 +213,12 @@
               <option value="Wildlife & Nature">Wildlife & Nature</option>
             </select>
           </div>
+        </div>
+
+        <!-- Caption / Story -->
+        <div>
+          <label class="block text-xs uppercase tracking-wider text-gray-400 mb-1 font-mono">Caption / Story</label>
+          <textarea id="photoCaption" rows="3" placeholder="Tell the story behind this photograph..." class="w-full bg-charcoal-900 border border-charcoal-700 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-gray-500"></textarea>
         </div>
 
         <!-- Auto-Extracted EXIF Grid -->
@@ -571,6 +576,7 @@
           avatar_url: userAvatar,
           title: document.getElementById('photoTitle').value,
           genre: document.getElementById('photoGenre').value,
+          caption: document.getElementById('photoCaption').value,
           image_url: publicUrl,
           camera: document.getElementById('exifCamera').value,
           lens: document.getElementById('exifLens').value,
@@ -586,7 +592,7 @@
         showToast('Photograph published successfully!');
         document.getElementById('uploadForm').reset();
         document.getElementById('uploadPreview').classList.add('hidden');
-        document.getElementById('uploadPlaceholder').classList.add('hidden');
+        document.getElementById('uploadPlaceholder').classList.remove('hidden');
         selectedFile = null;
 
         switchTab('feed');
@@ -656,47 +662,98 @@
               <div class="flex items-center gap-3">
                 <span class="text-xs bg-charcoal-900 border border-charcoal-700 text-gray-400 px-2.5 py-1 rounded font-mono hidden sm:inline">Original Ratio</span>
                 ${isOwner ? `
-                  <button onclick="toggleEditGenre('${post.id}')" title="Edit Genre" class="text-gray-400 hover:text-white p-1 transition">
+                  <button onclick="toggleEditPost('${post.id}')" title="Edit Post Details" class="text-gray-400 hover:text-white p-1 transition">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                   </button>
                 ` : ''}
               </div>
             </div>
 
-            <!-- Inline Edit Genre Box -->
-            <div id="editGenreBox_${post.id}" class="hidden px-6 py-3 bg-charcoal-900 border-b border-charcoal-700 flex items-center gap-3 text-xs">
-              <span class="text-gray-400 font-mono uppercase">Change Genre:</span>
-              <select id="newGenre_${post.id}" class="bg-charcoal-800 border border-charcoal-700 rounded px-2.5 py-1 text-white font-mono">
-                ${GENRES_LIST.map(g => `<option value="${g}" ${g === post.genre ? 'selected' : ''}>${g}</option>`).join('')}
-              </select>
-              <button onclick="saveNewGenre('${post.id}')" class="bg-white text-charcoal-900 font-semibold px-3 py-1 rounded hover:bg-gray-200 transition">Save</button>
-              <button onclick="toggleEditGenre('${post.id}')" class="text-gray-400 hover:text-white px-2 py-1">Cancel</button>
+            <!-- Full Inline Edit Post Drawer -->
+            <div id="editPostBox_${post.id}" class="hidden p-6 bg-charcoal-900 border-b border-charcoal-700 space-y-4 text-xs">
+              <div class="flex items-center justify-between border-b border-charcoal-700 pb-2">
+                <span class="font-mono text-gray-300 uppercase tracking-wider">Edit Photograph Details</span>
+                <button onclick="toggleEditPost('${post.id}')" class="text-gray-400 hover:text-white">✕ Cancel</button>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-gray-400 mb-1 font-mono">Title</label>
+                  <input type="text" id="editTitle_${post.id}" value="${escapeHtml(post.title || '')}" class="w-full bg-charcoal-800 border border-charcoal-700 rounded px-2.5 py-1.5 text-white">
+                </div>
+                <div>
+                  <label class="block text-gray-400 mb-1 font-mono">Genre</label>
+                  <select id="editGenre_${post.id}" class="w-full bg-charcoal-800 border border-charcoal-700 rounded px-2.5 py-1.5 text-white font-mono">
+                    ${GENRES_LIST.map(g => `<option value="${g}" ${g === post.genre ? 'selected' : ''}>${g}</option>`).join('')}
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-gray-400 mb-1 font-mono">Caption / Story</label>
+                <textarea id="editCaption_${post.id}" rows="2" class="w-full bg-charcoal-800 border border-charcoal-700 rounded px-2.5 py-1.5 text-white">${escapeHtml(post.caption || '')}</textarea>
+              </div>
+
+              <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                <div>
+                  <label class="block text-gray-500 uppercase text-[10px]">Camera Body</label>
+                  <input type="text" id="editCamera_${post.id}" value="${escapeHtml(post.camera || '')}" class="w-full bg-charcoal-800 border border-charcoal-700 rounded px-2 py-1 text-gray-200">
+                </div>
+                <div>
+                  <label class="block text-gray-500 uppercase text-[10px]">Lens</label>
+                  <input type="text" id="editLens_${post.id}" value="${escapeHtml(post.lens || '')}" class="w-full bg-charcoal-800 border border-charcoal-700 rounded px-2 py-1 text-gray-200">
+                </div>
+                <div>
+                  <label class="block text-gray-500 uppercase text-[10px]">Focal Length</label>
+                  <input type="text" id="editFocal_${post.id}" value="${escapeHtml(post.focal_length || '')}" class="w-full bg-charcoal-800 border border-charcoal-700 rounded px-2 py-1 text-gray-200">
+                </div>
+                <div>
+                  <label class="block text-gray-500 uppercase text-[10px]">Aperture</label>
+                  <input type="text" id="editAperture_${post.id}" value="${escapeHtml(post.aperture || '')}" class="w-full bg-charcoal-800 border border-charcoal-700 rounded px-2 py-1 text-gray-200">
+                </div>
+                <div>
+                  <label class="block text-gray-500 uppercase text-[10px]">Shutter Speed</label>
+                  <input type="text" id="editShutter_${post.id}" value="${escapeHtml(post.shutter_speed || '')}" class="w-full bg-charcoal-800 border border-charcoal-700 rounded px-2 py-1 text-gray-200">
+                </div>
+                <div>
+                  <label class="block text-gray-500 uppercase text-[10px]">ISO</label>
+                  <input type="text" id="editIso_${post.id}" value="${escapeHtml(post.iso || '')}" class="w-full bg-charcoal-800 border border-charcoal-700 rounded px-2 py-1 text-gray-200">
+                </div>
+              </div>
+
+              <div class="flex justify-end pt-2">
+                <button onclick="savePostEdits('${post.id}')" class="bg-white text-charcoal-900 font-semibold px-4 py-2 rounded hover:bg-gray-200 transition">Save Changes</button>
+              </div>
             </div>
 
             <div class="bg-black flex items-center justify-center p-2">
               <img src="${escapeHtml(post.image_url)}" alt="${escapeHtml(post.title || 'Photograph')}" class="max-h-[85vh] w-auto object-contain">
             </div>
 
-            <!-- EXIF Drawer & Actions -->
-            <div class="px-6 py-4 bg-charcoal-800/90 border-t border-charcoal-700/60 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div class="grid grid-cols-2 sm:flex sm:flex-wrap gap-x-6 gap-y-1 text-xs font-mono text-gray-300">
-                ${post.camera ? `<div><span class="text-gray-500">Body:</span> ${escapeHtml(post.camera)}</div>` : ''}
-                ${post.lens ? `<div><span class="text-gray-500">Lens:</span> ${escapeHtml(post.lens)}</div>` : ''}
-                ${post.focal_length ? `<div><span class="text-gray-500">Focal:</span> ${escapeHtml(post.focal_length)}</div>` : ''}
-                ${post.aperture ? `<div><span class="text-gray-500">Aperture:</span> ${escapeHtml(post.aperture)}</div>` : ''}
-                ${post.shutter_speed ? `<div><span class="text-gray-500">Shutter:</span> ${escapeHtml(post.shutter_speed)}</div>` : ''}
-                ${post.iso ? `<div><span class="text-gray-500">ISO:</span> ${escapeHtml(post.iso)}</div>` : ''}
-              </div>
+            <!-- Caption & EXIF Drawer & Actions -->
+            <div class="px-6 py-4 bg-charcoal-800/90 border-t border-charcoal-700/60 space-y-3">
+              ${post.caption ? `<p class="text-xs text-gray-200 leading-relaxed font-sans">${escapeHtml(post.caption)}</p>` : ''}
+              
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-1">
+                <div class="grid grid-cols-2 sm:flex sm:flex-wrap gap-x-6 gap-y-1 text-xs font-mono text-gray-300">
+                  ${post.camera ? `<div><span class="text-gray-500">Body:</span> ${escapeHtml(post.camera)}</div>` : ''}
+                  ${post.lens ? `<div><span class="text-gray-500">Lens:</span> ${escapeHtml(post.lens)}</div>` : ''}
+                  ${post.focal_length ? `<div><span class="text-gray-500">Focal:</span> ${escapeHtml(post.focal_length)}</div>` : ''}
+                  ${post.aperture ? `<div><span class="text-gray-500">Aperture:</span> ${escapeHtml(post.aperture)}</div>` : ''}
+                  ${post.shutter_speed ? `<div><span class="text-gray-500">Shutter:</span> ${escapeHtml(post.shutter_speed)}</div>` : ''}
+                  ${post.iso ? `<div><span class="text-gray-500">ISO:</span> ${escapeHtml(post.iso)}</div>` : ''}
+                </div>
 
-              <div class="flex items-center gap-3">
-                <button onclick="toggleCritiqueSection('${post.id}')" class="text-xs text-gray-300 bg-charcoal-700 hover:bg-charcoal-600 px-3 py-1.5 rounded transition font-mono">
-                  Critiques (${postCritiques.length})
-                </button>
-                ${isOwner ? `
-                  <button onclick="deletePost('${post.id}', '${post.image_url}')" title="Delete Photograph" class="text-gray-400 hover:text-red-400 p-1.5 transition">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                <div class="flex items-center gap-3">
+                  <button onclick="toggleCritiqueSection('${post.id}')" class="text-xs text-gray-300 bg-charcoal-700 hover:bg-charcoal-600 px-3 py-1.5 rounded transition font-mono">
+                    Critiques (${postCritiques.length})
                   </button>
-                ` : ''}
+                  ${isOwner ? `
+                    <button onclick="deletePost('${post.id}', '${post.image_url}')" title="Delete Photograph" class="text-gray-400 hover:text-red-400 p-1.5 transition">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    </button>
+                  ` : ''}
+                </div>
               </div>
             </div>
 
@@ -845,66 +902,125 @@
               </div>
               <div class="flex items-center gap-3">
                 <span class="text-xs bg-charcoal-900 border border-charcoal-700 text-gray-400 px-2.5 py-1 rounded font-mono hidden sm:inline">Original Ratio</span>
-                <button onclick="toggleEditGenre('profile_${post.id}')" title="Edit Genre" class="text-gray-400 hover:text-white p-1 transition">
+                <button onclick="toggleEditPost('profile_${post.id}')" title="Edit Post Details" class="text-gray-400 hover:text-white p-1 transition">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                 </button>
               </div>
             </div>
 
-            <!-- Inline Edit Genre Box for Profile -->
-            <div id="editGenreBox_profile_${post.id}" class="hidden px-6 py-3 bg-charcoal-900 border-b border-charcoal-700 flex items-center gap-3 text-xs">
-              <span class="text-gray-400 font-mono uppercase">Change Genre:</span>
-              <select id="newGenre_profile_${post.id}" class="bg-charcoal-800 border border-charcoal-700 rounded px-2.5 py-1 text-white font-mono">
-                ${GENRES_LIST.map(g => `<option value="${g}" ${g === post.genre ? 'selected' : ''}>${g}</option>`).join('')}
-              </select>
-              <button onclick="saveNewGenreProfile('${post.id}')" class="bg-white text-charcoal-900 font-semibold px-3 py-1 rounded hover:bg-gray-200 transition">Save</button>
-              <button onclick="toggleEditGenre('profile_${post.id}')" class="text-gray-400 hover:text-white px-2 py-1">Cancel</button>
+            <!-- Full Inline Edit Post Drawer for Profile -->
+            <div id="editPostBox_profile_${post.id}" class="hidden p-6 bg-charcoal-900 border-b border-charcoal-700 space-y-4 text-xs">
+              <div class="flex items-center justify-between border-b border-charcoal-700 pb-2">
+                <span class="font-mono text-gray-300 uppercase tracking-wider">Edit Photograph Details</span>
+                <button onclick="toggleEditPost('profile_${post.id}')" class="text-gray-400 hover:text-white">✕ Cancel</button>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-gray-400 mb-1 font-mono">Title</label>
+                  <input type="text" id="editTitle_profile_${post.id}" value="${escapeHtml(post.title || '')}" class="w-full bg-charcoal-800 border border-charcoal-700 rounded px-2.5 py-1.5 text-white">
+                </div>
+                <div>
+                  <label class="block text-gray-400 mb-1 font-mono">Genre</label>
+                  <select id="editGenre_profile_${post.id}" class="w-full bg-charcoal-800 border border-charcoal-700 rounded px-2.5 py-1.5 text-white font-mono">
+                    ${GENRES_LIST.map(g => `<option value="${g}" ${g === post.genre ? 'selected' : ''}>${g}</option>`).join('')}
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-gray-400 mb-1 font-mono">Caption / Story</label>
+                <textarea id="editCaption_profile_${post.id}" rows="2" class="w-full bg-charcoal-800 border border-charcoal-700 rounded px-2.5 py-1.5 text-white">${escapeHtml(post.caption || '')}</textarea>
+              </div>
+
+              <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                <div>
+                  <label class="block text-gray-500 uppercase text-[10px]">Camera Body</label>
+                  <input type="text" id="editCamera_profile_${post.id}" value="${escapeHtml(post.camera || '')}" class="w-full bg-charcoal-800 border border-charcoal-700 rounded px-2 py-1 text-gray-200">
+                </div>
+                <div>
+                  <label class="block text-gray-500 uppercase text-[10px]">Lens</label>
+                  <input type="text" id="editLens_profile_${post.id}" value="${escapeHtml(post.lens || '')}" class="w-full bg-charcoal-800 border border-charcoal-700 rounded px-2 py-1 text-gray-200">
+                </div>
+                <div>
+                  <label class="block text-gray-500 uppercase text-[10px]">Focal Length</label>
+                  <input type="text" id="editFocal_profile_${post.id}" value="${escapeHtml(post.focal_length || '')}" class="w-full bg-charcoal-800 border border-charcoal-700 rounded px-2 py-1 text-gray-200">
+                </div>
+                <div>
+                  <label class="block text-gray-500 uppercase text-[10px]">Aperture</label>
+                  <input type="text" id="editAperture_profile_${post.id}" value="${escapeHtml(post.aperture || '')}" class="w-full bg-charcoal-800 border border-charcoal-700 rounded px-2 py-1 text-gray-200">
+                </div>
+                <div>
+                  <label class="block text-gray-500 uppercase text-[10px]">Shutter Speed</label>
+                  <input type="text" id="editShutter_profile_${post.id}" value="${escapeHtml(post.shutter_speed || '')}" class="w-full bg-charcoal-800 border border-charcoal-700 rounded px-2 py-1 text-gray-200">
+                </div>
+                <div>
+                  <label class="block text-gray-500 uppercase text-[10px]">ISO</label>
+                  <input type="text" id="editIso_profile_${post.id}" value="${escapeHtml(post.iso || '')}" class="w-full bg-charcoal-800 border border-charcoal-700 rounded px-2 py-1 text-gray-200">
+                </div>
+              </div>
+
+              <div class="flex justify-end pt-2">
+                <button onclick="savePostEdits('${post.id}', true)" class="bg-white text-charcoal-900 font-semibold px-4 py-2 rounded hover:bg-gray-200 transition">Save Changes</button>
+              </div>
             </div>
 
             <div class="bg-black flex items-center justify-center p-2">
               <img src="${escapeHtml(post.image_url)}" alt="${escapeHtml(post.title || 'Photograph')}" class="max-h-[85vh] w-auto object-contain">
             </div>
 
-            <div class="px-6 py-4 bg-charcoal-800/90 border-t border-charcoal-700/60 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div class="grid grid-cols-2 sm:flex sm:flex-wrap gap-x-6 gap-y-1 text-xs font-mono text-gray-300">
-                ${post.camera ? `<div><span class="text-gray-500">Body:</span> ${escapeHtml(post.camera)}</div>` : ''}
-                ${post.lens ? `<div><span class="text-gray-500">Lens:</span> ${escapeHtml(post.lens)}</div>` : ''}
-                ${post.focal_length ? `<div><span class="text-gray-500">Focal:</span> ${escapeHtml(post.focal_length)}</div>` : ''}
-                ${post.aperture ? `<div><span class="text-gray-500">Aperture:</span> ${escapeHtml(post.aperture)}</div>` : ''}
-                ${post.shutter_speed ? `<div><span class="text-gray-500">Shutter:</span> ${escapeHtml(post.shutter_speed)}</div>` : ''}
-                ${post.iso ? `<div><span class="text-gray-500">ISO:</span> ${escapeHtml(post.iso)}</div>` : ''}
-              </div>
+            <div class="px-6 py-4 bg-charcoal-800/90 border-t border-charcoal-700/60 space-y-3">
+              ${post.caption ? `<p class="text-xs text-gray-200 leading-relaxed font-sans">${escapeHtml(post.caption)}</p>` : ''}
+              
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-1">
+                <div class="grid grid-cols-2 sm:flex sm:flex-wrap gap-x-6 gap-y-1 text-xs font-mono text-gray-300">
+                  ${post.camera ? `<div><span class="text-gray-500">Body:</span> ${escapeHtml(post.camera)}</div>` : ''}
+                  ${post.lens ? `<div><span class="text-gray-500">Lens:</span> ${escapeHtml(post.lens)}</div>` : ''}
+                  ${post.focal_length ? `<div><span class="text-gray-500">Focal:</span> ${escapeHtml(post.focal_length)}</div>` : ''}
+                  ${post.aperture ? `<div><span class="text-gray-500">Aperture:</span> ${escapeHtml(post.aperture)}</div>` : ''}
+                  ${post.shutter_speed ? `<div><span class="text-gray-500">Shutter:</span> ${escapeHtml(post.shutter_speed)}</div>` : ''}
+                  ${post.iso ? `<div><span class="text-gray-500">ISO:</span> ${escapeHtml(post.iso)}</div>` : ''}
+                </div>
 
-              <button onclick="deletePost('${post.id}', '${post.image_url}')" title="Delete Photograph" class="text-gray-400 hover:text-red-400 p-1.5 transition">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-              </button>
+                <button onclick="deletePost('${post.id}', '${post.image_url}')" title="Delete Photograph" class="text-gray-400 hover:text-red-400 p-1.5 transition">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                </button>
+              </div>
             </div>
           </article>
         `;
       }).join('');
     }
 
-    function toggleEditGenre(idKey) {
-      const box = document.getElementById(`editGenreBox_${idKey}`);
+    function toggleEditPost(idKey) {
+      const box = document.getElementById(`editPostBox_${idKey}`);
       if (box) {
         box.classList.toggle('hidden');
       }
     }
 
-    async function saveNewGenre(postId) {
-      const selectElement = document.getElementById(`newGenre_${postId}`);
-      const newGenre = selectElement ? selectElement.value : null;
-      if (!newGenre) return;
+    async function savePostEdits(postId, isProfile = false) {
+      const key = isProfile ? `profile_${postId}` : postId;
+      
+      const title = document.getElementById(`editTitle_${key}`).value;
+      const genre = document.getElementById(`editGenre_${key}`).value;
+      const caption = document.getElementById(`editCaption_${key}`).value;
+      const camera = document.getElementById(`editCamera_${key}`).value;
+      const lens = document.getElementById(`editLens_${key}`).value;
+      const focal_length = document.getElementById(`editFocal_${key}`).value;
+      const aperture = document.getElementById(`editAperture_${key}`).value;
+      const shutter_speed = document.getElementById(`editShutter_${key}`).value;
+      const iso = document.getElementById(`editIso_${key}`).value;
 
       try {
         const { error } = await supabaseClient
           .from('posts')
-          .update({ genre: newGenre })
+          .update({ title, genre, caption, camera, lens, focal_length, aperture, shutter_speed, iso })
           .eq('id', postId);
 
         if (error) throw error;
 
-        showToast('Genre updated successfully!');
+        showToast('Photograph updated successfully!');
         
         if (!document.getElementById('tabProfile').classList.contains('hidden')) {
           loadProfileFeed();
@@ -912,29 +1028,8 @@
           loadFeed();
         }
       } catch (err) {
-        console.error("Error updating genre:", err);
-        alert("Failed to update genre: " + err.message);
-      }
-    }
-
-    async function saveNewGenreProfile(postId) {
-      const selectElement = document.getElementById(`newGenre_profile_${postId}`);
-      const newGenre = selectElement ? selectElement.value : null;
-      if (!newGenre) return;
-
-      try {
-        const { error } = await supabaseClient
-          .from('posts')
-          .update({ genre: newGenre })
-          .eq('id', postId);
-
-        if (error) throw error;
-
-        showToast('Genre updated successfully!');
-        loadProfileFeed();
-      } catch (err) {
-        console.error("Error updating genre:", err);
-        alert("Failed to update genre: " + err.message);
+        console.error("Error updating post:", err);
+        alert("Failed to update post: " + err.message);
       }
     }
 
