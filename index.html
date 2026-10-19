@@ -40,7 +40,7 @@
     .editorial-font { font-family: 'Newsreader', serif; }
   </style>
 </head>
-<body class="bg-charcoal-900 text-gray-100 min-h-screen flex flex-col selection:bg-gray-700 selection:text-white" onclick="handleBodyClick(event)">
+<body class="bg-charcoal-900 text-gray-100 min-h-screen flex flex-col selection:bg-gray-700 selection:text-white pb-20" onclick="handleBodyClick(event)">
 
   <!-- Top Navigation Bar -->
   <header class="sticky top-0 z-50 bg-charcoal-900/90 backdrop-blur-md border-b border-charcoal-700">
@@ -67,8 +67,6 @@
           </button>
         </div>
 
-        <button onclick="switchTab('upload')" id="navUpload" class="text-sm font-medium text-gray-400 hover:text-white px-3 py-1.5 rounded transition hidden auth-required">+ Publish Work</button>
-        
         <!-- Auth / Dropdown Menu Container -->
         <div id="authContainer" class="relative">
           <button onclick="openAuthModal()" class="text-xs uppercase tracking-wider font-semibold bg-white text-charcoal-900 px-4 py-2 rounded hover:bg-gray-200 transition">
@@ -135,7 +133,7 @@
 
     </div>
 
-    <!-- PROFILE PORTFOLIO TAB -->
+    <!-- PROFILE PORTFOLIO & SAVED CATALOGS TAB -->
     <div id="tabProfile" class="hidden space-y-8 max-w-3xl mx-auto">
       <div class="flex flex-col sm:flex-row items-center sm:items-start gap-8 border-b border-charcoal-700 pb-8">
         <div class="relative group">
@@ -162,8 +160,8 @@
 
           <div class="flex justify-center sm:justify-start gap-6 text-sm text-gray-300">
             <div><strong id="profilePostCount" class="text-white font-medium">0</strong> posts</div>
+            <div><strong id="profileSavedCount" class="text-white font-medium">0</strong> saved</div>
             <div><span class="text-white font-medium">0</span> followers</div>
-            <div><span class="text-white font-medium">0</span> following</div>
           </div>
 
           <div class="text-xs sm:text-sm text-gray-300 space-y-1 font-sans">
@@ -173,34 +171,51 @@
         </div>
       </div>
 
-      <!-- Profile Grid Controls: Genre Filter Bar -->
-      <div class="flex flex-col sm:flex-row items-center justify-between border-b border-charcoal-800 pb-3 gap-4">
-        <div class="flex items-center gap-3 w-full sm:w-auto">
-          <span class="text-xs font-mono uppercase tracking-widest text-white whitespace-nowrap">Portfolio Stream</span>
-        </div>
-        
-        <!-- Profile Genre Filter Dropdown -->
-        <select id="profileGenreFilterSelect" onchange="filterProfileGenreDropdown(this.value)" class="bg-charcoal-800 border border-charcoal-700 rounded px-3 py-1.5 text-xs text-white focus:outline-none focus:border-gray-500 font-mono w-full sm:w-auto">
-          <option value="All">All Genres</option>
-          <option value="Abstract">Abstract</option>
-          <option value="Analog / Film">Analog / Film</option>
-          <option value="Architecture">Architecture</option>
-          <option value="Astro & Night">Astro & Night</option>
-          <option value="Black & White">Black & White</option>
-          <option value="Documentary">Documentary</option>
-          <option value="Fine Art">Fine Art</option>
-          <option value="Landscape">Landscape</option>
-          <option value="Minimalist">Minimalist</option>
-          <option value="Portrait">Portrait</option>
-          <option value="Street">Street</option>
-          <option value="Travel & Culture">Travel & Culture</option>
-          <option value="Wildlife & Nature">Wildlife & Nature</option>
-        </select>
+      <!-- Profile View Sub-Tabs: Published Stream vs Saved Photo Catalogs -->
+      <div class="flex items-center gap-6 border-b border-charcoal-800 pb-3">
+        <button onclick="setProfileViewTab('published')" id="profileTabPublished" class="text-xs font-mono uppercase tracking-widest text-white font-semibold border-b-2 border-white pb-3 -mb-3 transition">Published Stream</button>
+        <button onclick="setProfileViewTab('saved')" id="profileTabSaved" class="text-xs font-mono uppercase tracking-widest text-gray-400 hover:text-white transition pb-3 -mb-3">Saved Photo Catalogs</button>
       </div>
 
-      <!-- Instagram Square Grid Stream -->
-      <div id="profileFeed" class="grid grid-cols-3 gap-1 sm:gap-2">
-        <div class="text-center py-20 text-gray-500 font-light col-span-3">Loading portfolio...</div>
+      <!-- PUBLISHED STREAM VIEW -->
+      <div id="profilePublishedSection" class="space-y-6">
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+          <span class="text-xs font-mono text-gray-400">Published Works</span>
+          <select id="profileGenreFilterSelect" onchange="filterProfileGenreDropdown(this.value)" class="bg-charcoal-800 border border-charcoal-700 rounded px-3 py-1.5 text-xs text-white focus:outline-none focus:border-gray-500 font-mono w-full sm:w-auto">
+            <option value="All">All Genres</option>
+            <option value="Abstract">Abstract</option>
+            <option value="Analog / Film">Analog / Film</option>
+            <option value="Architecture">Architecture</option>
+            <option value="Astro & Night">Astro & Night</option>
+            <option value="Black & White">Black & White</option>
+            <option value="Documentary">Documentary</option>
+            <option value="Fine Art">Fine Art</option>
+            <option value="Landscape">Landscape</option>
+            <option value="Minimalist">Minimalist</option>
+            <option value="Portrait">Portrait</option>
+            <option value="Street">Street</option>
+            <option value="Travel & Culture">Travel & Culture</option>
+            <option value="Wildlife & Nature">Wildlife & Nature</option>
+          </select>
+        </div>
+
+        <div id="profileFeed" class="grid grid-cols-3 gap-1 sm:gap-2">
+          <div class="text-center py-20 text-gray-500 font-light col-span-3">Loading portfolio...</div>
+        </div>
+      </div>
+
+      <!-- SAVED PHOTO CATALOGS VIEW -->
+      <div id="profileSavedSection" class="hidden space-y-6">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-mono text-gray-400">Curated Catalogs</span>
+          <select id="catalogFilterSelect" onchange="filterSavedCatalog(this.value)" class="bg-charcoal-800 border border-charcoal-700 rounded px-3 py-1.5 text-xs text-white font-mono">
+            <option value="All">All Catalogs</option>
+          </select>
+        </div>
+
+        <div id="savedFeed" class="grid grid-cols-3 gap-1 sm:gap-2">
+          <div class="text-center py-20 text-gray-500 font-light col-span-3">No saved photos yet.</div>
+        </div>
       </div>
     </div>
 
@@ -267,9 +282,12 @@
 
     <!-- PUBLISH / UPLOAD TAB -->
     <div id="tabUpload" class="hidden max-w-2xl mx-auto bg-charcoal-800 border border-charcoal-700 rounded-lg p-6 sm:p-8 shadow-xl">
-      <div class="mb-6">
-        <h2 class="text-2xl editorial-font italic font-light">Publish to Queate</h2>
-        <p class="text-xs text-gray-400 mt-1 uppercase tracking-wider">Share your photography in original uncropped aspect ratio.</p>
+      <div class="mb-6 flex justify-between items-center">
+        <div>
+          <h2 class="text-2xl editorial-font italic font-light">Publish to Queate</h2>
+          <p class="text-xs text-gray-400 mt-1 uppercase tracking-wider">Share your photography in original uncropped aspect ratio.</p>
+        </div>
+        <button onclick="switchTab('feed')" class="text-xs font-mono text-gray-400 hover:text-white">✕ Close</button>
       </div>
 
       <form id="uploadForm" onsubmit="handleUpload(event)" class="space-y-6">
@@ -278,7 +296,7 @@
           <div id="uploadPlaceholder" class="space-y-2">
             <svg class="w-10 h-10 mx-auto text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
             <p class="text-sm text-gray-300 font-medium">Click to select or drag uncropped photo</p>
-            <p class="text-xs text-gray-500">Supports high-res JPEG/PNG (EXIF data will be auto-extracted)</p>
+            <p class="text-xs text-gray-500">Supports high-res JPEG/PNG (Max 20MB uncompressed, auto-resized if larger)</p>
           </div>
           <img id="uploadPreview" class="max-h-96 mx-auto hidden rounded shadow-md object-contain" alt="Preview">
         </div>
@@ -357,7 +375,89 @@
 
   </main>
 
-  <!-- COMPACT VIEW LIGHTBOX / PREVIEW MODAL WITH CURATION & CRITIQUES -->
+  <!-- FLOATING PUBLISH BUTTON -->
+  <button onclick="switchTab('upload')" id="floatingPublishBtn" title="Publish New Work" class="fixed bottom-6 right-6 z-40 bg-white text-charcoal-900 font-semibold p-4 rounded-full shadow-2xl hover:bg-gray-200 transition flex items-center gap-2 border border-charcoal-700 group">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+    <span class="max-w-0 overflow-hidden whitespace-nowrap group-hover:max-w-xs transition-all duration-300 text-xs font-mono uppercase tracking-wider">Publish Work</span>
+  </button>
+
+  <!-- SAVE TO CATALOG DIALOG MODAL -->
+  <div id="saveCatalogModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-charcoal-800 border border-charcoal-700 w-full max-w-md p-6 rounded-lg shadow-2xl space-y-4 relative">
+      <button onclick="closeSaveCatalogModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white">✕</button>
+      
+      <h3 class="text-lg editorial-font italic font-light">Save to Photo Catalog</h3>
+      <p class="text-xs text-gray-400 uppercase font-mono">Organize into custom personal collections</p>
+
+      <div class="space-y-3 pt-2">
+        <div>
+          <label class="block text-xs font-mono text-gray-300 mb-1">Select Existing Catalog</label>
+          <select id="selectCatalogDropdown" class="w-full bg-charcoal-900 border border-charcoal-700 rounded px-3 py-2 text-xs text-white font-mono focus:outline-none">
+            <option value="Favorites">Favorites</option>
+            <option value="Inspiration">Inspiration</option>
+            <option value="Lighting Study">Lighting Study</option>
+          </select>
+        </div>
+
+        <div class="relative flex items-center my-2">
+          <div class="flex-grow border-t border-charcoal-700"></div>
+          <span class="flex-shrink mx-2 text-[10px] text-gray-500 font-mono uppercase">OR CREATE NEW</span>
+          <div class="flex-grow border-t border-charcoal-700"></div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-mono text-gray-300 mb-1">New Catalog Name</label>
+          <input type="text" id="newCatalogInput" placeholder="e.g. Moody Landscapes" class="w-full bg-charcoal-900 border border-charcoal-700 rounded px-3 py-2 text-xs text-white focus:outline-none">
+        </div>
+
+        <button onclick="confirmSaveToCatalog()" class="w-full bg-white text-charcoal-900 font-semibold py-2 rounded text-xs hover:bg-gray-200 transition mt-2">
+          Save Photo to Catalog
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FILE SIZE WARNING MODAL (FOR > 20MB PHOTOS) -->
+  <div id="fileSizeModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-charcoal-800 border border-charcoal-700 w-full max-w-md p-6 rounded-lg shadow-2xl space-y-4">
+      <div class="flex items-center gap-3 text-amber-400">
+        <svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+        <h3 class="text-base font-semibold text-white">Large Photo Warning</h3>
+      </div>
+      
+      <p class="text-xs text-gray-300 leading-relaxed font-sans">
+        File is larger than 20MB which can soften details or flatten contrast if not pre-formatted.
+      </p>
+
+      <div class="flex gap-3 pt-2">
+        <button onclick="closeFileSizeModal()" class="flex-1 bg-charcoal-700 hover:bg-charcoal-600 text-white font-medium py-2 rounded text-xs transition">
+          Try Again / Reselect
+        </button>
+        <button onclick="proceedWithResizedFile()" class="flex-1 bg-white hover:bg-gray-200 text-charcoal-900 font-semibold py-2 rounded text-xs transition">
+          Proceed to Compress & Upload
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SHARE DIALOG MODAL -->
+  <div id="shareModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-charcoal-800 border border-charcoal-700 w-full max-w-md p-6 rounded-lg shadow-2xl space-y-4 relative">
+      <button onclick="closeShareModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white">✕</button>
+      
+      <h3 class="text-lg editorial-font italic font-light">Share Photograph</h3>
+      <p class="text-xs text-gray-400 uppercase font-mono">Copy direct permalink or share work</p>
+
+      <div class="space-y-3 pt-2">
+        <input type="text" id="shareUrlInput" readonly class="w-full bg-charcoal-900 border border-charcoal-700 rounded px-3 py-2 text-xs text-white font-mono">
+        <button onclick="copyShareUrl()" class="w-full bg-white text-charcoal-900 font-semibold py-2 rounded text-xs hover:bg-gray-200 transition">
+          Copy Link to Clipboard
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMPACT VIEW LIGHTBOX / PREVIEW MODAL -->
   <div id="compactModal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 hidden">
     <div class="bg-charcoal-800 border border-charcoal-700 max-w-2xl w-full rounded-lg overflow-hidden shadow-2xl relative max-h-[90vh] flex flex-col">
       <div class="px-4 py-3 bg-charcoal-900 border-b border-charcoal-700 flex items-center justify-between">
@@ -368,7 +468,10 @@
         <img id="modalImage" src="" alt="Enlarged View" class="max-h-[50vh] w-auto object-contain">
       </div>
       <div class="p-4 bg-charcoal-800 border-t border-charcoal-700 space-y-4 text-xs overflow-y-auto max-h-[35vh]">
-        <p class="text-gray-300 font-mono">By <span id="modalAuthorContainer"></span> &bull; Genre: <span id="modalGenre" class="text-gray-400"></span></p>
+        <div class="flex items-center justify-between">
+          <p class="text-gray-300 font-mono">By <span id="modalAuthorContainer"></span> &bull; Genre: <span id="modalGenre" class="text-gray-400"></span></p>
+          <div id="modalActions" class="flex items-center gap-3"></div>
+        </div>
         <div id="modalCaptionContainer" class="text-gray-200 font-sans leading-relaxed"></div>
         <div id="modalExif" class="grid grid-cols-2 sm:grid-cols-3 gap-2 font-mono text-[11px] text-gray-400 pt-2 border-t border-charcoal-700/60"></div>
         
@@ -376,7 +479,6 @@
         <div id="modalCritiqueWrapper" class="pt-2 border-t border-charcoal-700/60 space-y-4">
           <h4 class="text-xs uppercase tracking-wider text-gray-400 font-mono">Artistic & Technical Critiques</h4>
           <div id="modalCritiquesList" class="space-y-3"></div>
-
           <div id="modalCritiqueFormArea"></div>
         </div>
       </div>
@@ -410,7 +512,7 @@
   </div>
 
   <!-- Toast Notification -->
-  <div id="toast" class="fixed bottom-6 right-6 bg-charcoal-800 border border-charcoal-600 text-white text-xs px-4 py-3 rounded shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 z-50">
+  <div id="toast" class="fixed bottom-6 left-6 bg-charcoal-800 border border-charcoal-600 text-white text-xs px-4 py-3 rounded shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 z-50">
     Notification message here
   </div>
 
@@ -422,20 +524,27 @@
 
   <!-- Application Logic Script -->
   <script>
- // Supabase Configuration
+     // Supabase Configuration
     const SUPABASE_URL = 'https://rljhjqaqxzjfjcpkwaxy.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJsamhqcWFxeHpqZmpjcGt3YXh5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzMDUwNTAsImV4cCI6MjEwNzg4MTA1MH0.ZqPWN1GWmnbU677e8b4_1goXtm5S0dzf7g-UC6jDOzg';
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
+    
     let currentUser = null;
     let selectedFile = null;
+    let resizedFileToUpload = null;
     let previewUrl = null;
     let currentGenreFilter = 'All';
     let currentProfileGenreFilter = 'All';
+    let currentSavedCatalogFilter = 'All';
+    let activeProfileSubTab = 'published';
     let globalSearchQuery = '';
     let viewingProfileHandle = null; 
     let galleryViewMode = 'full';
     let allCritiquesCache = [];
+    let likesCache = {};
+    let savedPhotosCache = [];
+    let userCatalogsList = ['Favorites', 'Inspiration', 'Lighting Study'];
+    let pendingSavePostId = null;
 
     const GENRES_LIST = [
       "Abstract", "Analog / Film", "Architecture", "Astro & Night", 
@@ -449,6 +558,7 @@
         currentUser = session.user;
         await ensureDefaultHandle();
         updateAuthUI();
+        loadUserSavedData();
       }
 
       const savedTab = localStorage.getItem('queate_active_tab') || 'feed';
@@ -469,9 +579,33 @@
       }
     }
 
+    async function loadUserSavedData() {
+      if (!currentUser) return;
+      // Load saved photos from local storage for demo/persistence
+      const localSaved = localStorage.getItem(`queate_saved_${currentUser.id}`);
+      if (localSaved) {
+        try { savedPhotosCache = JSON.parse(localSaved); } catch(e) {}
+      }
+      const localCatalogs = localStorage.getItem(`queate_catalogs_${currentUser.id}`);
+      if (localCatalogs) {
+        try { userCatalogsList = JSON.parse(localCatalogs); } catch(e) {}
+      }
+      const localLikes = localStorage.getItem(`queate_likes_${currentUser.id}`);
+      if (localLikes) {
+        try { likesCache = JSON.parse(localLikes); } catch(e) {}
+      }
+    }
+
+    function saveUserDataToStorage() {
+      if (!currentUser) return;
+      localStorage.setItem(`queate_saved_${currentUser.id}`, JSON.stringify(savedPhotosCache));
+      localStorage.setItem(`queate_catalogs_${currentUser.id}`, JSON.stringify(userCatalogsList));
+      localStorage.setItem(`queate_likes_${currentUser.id}`, JSON.stringify(likesCache));
+    }
+
     function updateAuthUI() {
       const authContainer = document.getElementById('authContainer');
-      const authRequiredElements = document.querySelectorAll('.auth-required');
+      const floatingBtn = document.getElementById('floatingPublishBtn');
       
       if (currentUser) {
         const userHandle = currentUser.user_metadata?.handle || ('@' + currentUser.email.split('@')[0]);
@@ -491,7 +625,7 @@
             <!-- Dropdown Menu -->
             <div id="profileDropdownMenu" class="hidden absolute right-0 mt-2 w-48 bg-charcoal-800 border border-charcoal-700 rounded-lg shadow-2xl py-1 z-50 text-xs">
               <button onclick="viewMyProfile(); closeProfileDropdown();" class="w-full text-left px-4 py-2 text-gray-300 hover:bg-charcoal-700 hover:text-white transition flex items-center gap-2 font-mono">
-                <span>👤 My Feed</span>
+                <span>👤 My Profile & Catalogs</span>
               </button>
               <button onclick="switchTab('settings'); closeProfileDropdown();" class="w-full text-left px-4 py-2 text-gray-300 hover:bg-charcoal-700 hover:text-white transition flex items-center gap-2 font-mono">
                 <span>⚙️ Settings</span>
@@ -503,37 +637,31 @@
             </div>
           </div>
         `;
-        authRequiredElements.forEach(el => el.classList.remove('hidden'));
+        floatingBtn.classList.remove('hidden');
       } else {
         authContainer.innerHTML = `
           <button onclick="openAuthModal()" class="text-xs uppercase tracking-wider font-semibold bg-white text-charcoal-900 px-4 py-2 rounded hover:bg-gray-200 transition">
             Sign In
           </button>
         `;
-        authRequiredElements.forEach(el => el.classList.add('hidden'));
+        floatingBtn.classList.add('hidden');
       }
     }
 
     function toggleProfileDropdown(e) {
       e.stopPropagation();
       const menu = document.getElementById('profileDropdownMenu');
-      if (menu) {
-        menu.classList.toggle('hidden');
-      }
+      if (menu) menu.classList.toggle('hidden');
     }
 
     function closeProfileDropdown() {
       const menu = document.getElementById('profileDropdownMenu');
-      if (menu) {
-        menu.classList.add('hidden');
-      }
+      if (menu) menu.classList.add('hidden');
     }
 
     function handleBodyClick(e) {
       const menu = document.getElementById('profileDropdownMenu');
-      if (menu && !menu.classList.contains('hidden')) {
-        menu.classList.add('hidden');
-      }
+      if (menu && !menu.classList.contains('hidden')) menu.classList.add('hidden');
     }
 
     function toggleSearchBox(e) {
@@ -562,6 +690,7 @@
       currentUser = data.user;
       await ensureDefaultHandle();
       updateAuthUI();
+      loadUserSavedData();
       closeAuthModal();
       showToast('Signed in successfully.');
     }
@@ -649,32 +778,21 @@
       const tabSettings = document.getElementById('tabSettings');
       
       const navFeed = document.getElementById('navFeed');
-      const navUpload = document.getElementById('navUpload');
 
       [tabFeed, tabUpload, tabProfile, tabSettings].forEach(t => t.classList.add('hidden'));
-      [navFeed, navUpload].forEach(n => {
-        n.className = 'text-sm font-medium text-gray-400 hover:text-white px-3 py-1.5 rounded transition';
-      });
 
       if (tabName === 'feed') {
         tabFeed.classList.remove('hidden');
         navFeed.className = 'text-sm font-medium text-white px-3 py-1.5 rounded bg-charcoal-700 transition';
-        if(currentUser) {
-          navUpload.className = 'text-sm font-medium text-gray-400 hover:text-white px-3 py-1.5 rounded transition auth-required';
-        }
         loadFeed();
       } else if (tabName === 'profile') {
         tabProfile.classList.remove('hidden');
-        if(currentUser) {
-          navUpload.className = 'text-sm font-medium text-gray-400 hover:text-white px-3 py-1.5 rounded transition auth-required';
-        }
+        navFeed.className = 'text-sm font-medium text-gray-400 hover:text-white px-3 py-1.5 rounded transition';
         loadProfileFeed();
       } else if (tabName === 'settings') {
         if (!currentUser) { openAuthModal(); return; }
         tabSettings.classList.remove('hidden');
-        if(currentUser) {
-          navUpload.className = 'text-sm font-medium text-gray-400 hover:text-white px-3 py-1.5 rounded transition auth-required';
-        }
+        navFeed.className = 'text-sm font-medium text-gray-400 hover:text-white px-3 py-1.5 rounded transition';
         document.getElementById('settingsName').value = currentUser.user_metadata?.display_name || 'Justin';
         document.getElementById('settingsBio').value = currentUser.user_metadata?.bio || '🇳🇦 Sydney, Australia based • 🌿 Nature, Landscapes and Travel';
         document.getElementById('settingsGender').value = currentUser.user_metadata?.gender || 'Prefer not to say';
@@ -683,7 +801,28 @@
       } else if (tabName === 'upload') {
         if (!currentUser) { openAuthModal(); return; }
         tabUpload.classList.remove('hidden');
-        navUpload.className = 'text-sm font-medium text-white px-3 py-1.5 rounded bg-charcoal-700 transition';
+        navFeed.className = 'text-sm font-medium text-gray-400 hover:text-white px-3 py-1.5 rounded transition';
+      }
+    }
+
+    function setProfileViewTab(subTab) {
+      activeProfileSubTab = subTab;
+      const btnPublished = document.getElementById('profileTabPublished');
+      const btnSaved = document.getElementById('profileTabSaved');
+      const secPublished = document.getElementById('profilePublishedSection');
+      const secSaved = document.getElementById('profileSavedSection');
+
+      if (subTab === 'published') {
+        btnPublished.className = 'text-xs font-mono uppercase tracking-widest text-white font-semibold border-b-2 border-white pb-3 -mb-3 transition';
+        btnSaved.className = 'text-xs font-mono uppercase tracking-widest text-gray-400 hover:text-white transition pb-3 -mb-3';
+        secPublished.classList.remove('hidden');
+        secSaved.classList.add('hidden');
+      } else {
+        btnSaved.className = 'text-xs font-mono uppercase tracking-widest text-white font-semibold border-b-2 border-white pb-3 -mb-3 transition';
+        btnPublished.className = 'text-xs font-mono uppercase tracking-widest text-gray-400 hover:text-white transition pb-3 -mb-3';
+        secSaved.classList.remove('hidden');
+        secPublished.classList.add('hidden');
+        renderSavedFeed();
       }
     }
 
@@ -792,50 +931,111 @@
       }
     }
 
+    // FILE SELECTION & 20MB RESIZING HANDLER
     function handleFileSelect(e) {
       const file = e.target.files[0];
-      if (file) {
-        selectedFile = file;
-        
-        const reader = new FileReader();
-        reader.onload = function(event) {
-          previewUrl = event.target.result;
-          const previewImg = document.getElementById('uploadPreview');
-          previewImg.src = previewUrl;
-          previewImg.classList.remove('hidden');
-          document.getElementById('uploadPlaceholder').classList.add('hidden');
-        };
-        reader.readAsDataURL(file);
+      if (!file) return;
 
-        EXIF.getData(file, function() {
-          const cameraMake = EXIF.getTag(this, "Make") || "";
-          const cameraModel = EXIF.getTag(this, "Model") || "";
-          const lensModel = EXIF.getTag(this, "LensModel") || EXIF.getTag(this, "UndefinedTag:0xA434") || "";
-          const focalLength = EXIF.getTag(this, "FocalLength");
-          const aperture = EXIF.getTag(this, "FNumber");
-          const exposureTime = EXIF.getTag(this, "ExposureTime");
-          const iso = EXIF.getTag(this, "ISOSpeedRatings");
+      selectedFile = file;
+      resizedFileToUpload = null;
 
-          if (cameraMake || cameraModel) {
-            document.getElementById('exifCamera').value = `${cameraMake} ${cameraModel}`.trim();
-          }
-          if (lensModel) document.getElementById('exifLens').value = lensModel;
-          if (focalLength) document.getElementById('exifFocal').value = `${focalLength}mm`;
-          if (aperture) document.getElementById('exifAperture').value = `f/${aperture}`;
-          if (exposureTime) {
-            const shutterStr = exposureTime < 1 ? `1/${Math.round(1 / exposureTime)}s` : `${exposureTime}s`;
-            document.getElementById('exifShutter').value = shutterStr;
-          }
-          if (iso) document.getElementById('exifIso').value = `ISO ${iso}`;
-
-          showToast('EXIF metadata auto-extracted!');
-        });
+      const sizeMB = file.size / (1024 * 1024);
+      if (sizeMB > 20) {
+        document.getElementById('fileSizeModal').classList.remove('hidden');
+      } else {
+        processAndPreviewFile(file);
       }
+    }
+
+    function processAndPreviewFile(fileObj) {
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        previewUrl = event.target.result;
+        const previewImg = document.getElementById('uploadPreview');
+        previewImg.src = previewUrl;
+        previewImg.classList.remove('hidden');
+        document.getElementById('uploadPlaceholder').classList.add('hidden');
+      };
+      reader.readAsDataURL(fileObj);
+
+      EXIF.getData(fileObj, function() {
+        const cameraMake = EXIF.getTag(this, "Make") || "";
+        const cameraModel = EXIF.getTag(this, "Model") || "";
+        const lensModel = EXIF.getTag(this, "LensModel") || EXIF.getTag(this, "UndefinedTag:0xA434") || "";
+        const focalLength = EXIF.getTag(this, "FocalLength");
+        const aperture = EXIF.getTag(this, "FNumber");
+        const exposureTime = EXIF.getTag(this, "ExposureTime");
+        const iso = EXIF.getTag(this, "ISOSpeedRatings");
+
+        if (cameraMake || cameraModel) {
+          document.getElementById('exifCamera').value = `${cameraMake} ${cameraModel}`.trim();
+        }
+        if (lensModel) document.getElementById('exifLens').value = lensModel;
+        if (focalLength) document.getElementById('exifFocal').value = `${focalLength}mm`;
+        if (aperture) document.getElementById('exifAperture').value = `f/${aperture}`;
+        if (exposureTime) {
+          const shutterStr = exposureTime < 1 ? `1/${Math.round(1 / exposureTime)}s` : `${exposureTime}s`;
+          document.getElementById('exifShutter').value = shutterStr;
+        }
+        if (iso) document.getElementById('exifIso').value = `ISO ${iso}`;
+
+        showToast('EXIF metadata auto-extracted!');
+      });
+    }
+
+    function closeFileSizeModal() {
+      document.getElementById('fileSizeModal').classList.add('hidden');
+      document.getElementById('photoFile').value = '';
+      selectedFile = null;
+      resizedFileToUpload = null;
+    }
+
+    function proceedWithResizedFile() {
+      document.getElementById('fileSizeModal').classList.add('hidden');
+      if (!selectedFile) return;
+
+      showToast('Shrinking photo file size under 20MB...');
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+
+          // Downscale dimensions if extremely huge
+          const maxDim = 3840; // 4K max dimension
+          if (width > maxDim || height > maxDim) {
+            if (width > height) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            } else {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          canvas.toBlob(function(blob) {
+            resizedFileToUpload = new File([blob], selectedFile.name, { type: 'image/jpeg', lastModified: Date.now() });
+            processAndPreviewFile(resizedFileToUpload);
+            showToast('File compressed successfully for upload!');
+          }, 'image/jpeg', 0.88);
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(selectedFile);
     }
 
     async function handleUpload(e) {
       e.preventDefault();
-      if (!selectedFile || !currentUser) return;
+      const fileToUse = resizedFileToUpload || selectedFile;
+      if (!fileToUse || !currentUser) return;
 
       const captionVal = document.getElementById('photoCaption').value.trim();
       if (captionVal) {
@@ -851,13 +1051,13 @@
       submitBtn.disabled = true;
 
       try {
-        const fileExt = selectedFile.name.split('.').pop();
+        const fileExt = fileToUse.name.split('.').pop();
         const fileName = `${Math.random().toString(36).substring(2)}_${Date.now()}.${fileExt}`;
         const filePath = `${fileName}`;
 
         const { error: uploadError } = await supabaseClient.storage
           .from('photos')
-          .upload(filePath, selectedFile);
+          .upload(filePath, fileToUse);
 
         if (uploadError) throw uploadError;
 
@@ -896,6 +1096,7 @@
         document.getElementById('uploadPreview').classList.add('hidden');
         document.getElementById('uploadPlaceholder').classList.remove('hidden');
         selectedFile = null;
+        resizedFileToUpload = null;
 
         switchTab('feed');
 
@@ -1006,6 +1207,8 @@
           : `<div class="w-8 h-8 rounded-full bg-charcoal-700 text-gray-300 text-[10px] flex items-center justify-center font-mono">${authorHandle.substring(1, 3).toUpperCase()}</div>`;
 
         const postCritiques = allCritiquesCache.filter(c => c.post_id === post.id);
+        const isLiked = !!likesCache[post.id];
+        const isSaved = savedPhotosCache.some(s => s.id === post.id);
 
         let captionHtml = '';
         if (post.caption) {
@@ -1103,6 +1306,26 @@
 
             <div class="bg-black flex items-center justify-center p-2">
               <img src="${escapeHtml(post.image_url)}" alt="${escapeHtml(post.title || 'Photograph')}" class="max-h-[85vh] w-auto object-contain">
+            </div>
+
+            <!-- Action Toolbar (Like, Share, Save Catalog) -->
+            <div class="px-6 py-2.5 bg-charcoal-900 border-t border-charcoal-700/60 flex items-center justify-between text-xs font-mono">
+              <div class="flex items-center gap-4">
+                <button onclick="toggleLike('${post.id}')" class="flex items-center gap-1.5 ${isLiked ? 'text-red-400' : 'text-gray-400 hover:text-white'} transition">
+                  <svg class="w-4 h-4" fill="${isLiked ? 'currentColor' : 'none'}" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+                  <span>${isLiked ? 'Liked' : 'Like'}</span>
+                </button>
+
+                <button onclick="openShareModal('${escapeHtml(post.image_url)}', '${escapeHtml(post.title)}')" class="flex items-center gap-1.5 text-gray-400 hover:text-white transition">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 100-5.367 3 3 0 000 5.367zm0 8.474a3 3 0 100-5.367 3 3 0 000 5.367z"></path></svg>
+                  <span>Share</span>
+                </button>
+              </div>
+
+              <button onclick="openSaveToCatalogDialog('${post.id}', '${escapeHtml(post.image_url)}', '${escapeHtml(post.title)}', '${escapeHtml(authorHandle)}', '${escapeHtml(post.genre)}')" class="flex items-center gap-1.5 ${isSaved ? 'text-amber-400' : 'text-gray-400 hover:text-white'} transition">
+                <svg class="w-4 h-4" fill="${isSaved ? 'currentColor' : 'none'}" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path></svg>
+                <span>${isSaved ? 'Saved in Catalog' : 'Save to Catalog'}</span>
+              </button>
             </div>
 
             <div class="px-6 py-4 bg-charcoal-800/90 border-t border-charcoal-700/60 space-y-3">
@@ -1216,6 +1439,77 @@
       }).join('');
     }
 
+    function toggleLike(postId) {
+      if (!currentUser) { openAuthModal(); return; }
+      likesCache[postId] = !likesCache[postId];
+      saveUserDataToStorage();
+      showToast(likesCache[postId] ? 'Added to Liked photos' : 'Unliked photo');
+      loadFeed();
+    }
+
+    function openShareModal(url, title) {
+      document.getElementById('shareUrlInput').value = url;
+      document.getElementById('shareModal').classList.remove('hidden');
+    }
+
+    function closeShareModal() {
+      document.getElementById('shareModal').classList.add('hidden');
+    }
+
+    function copyShareUrl() {
+      const input = document.getElementById('shareUrlInput');
+      input.select();
+      document.execCommand('copy');
+      showToast('Photo URL copied to clipboard!');
+      closeShareModal();
+    }
+
+    function openSaveToCatalogDialog(postId, imgUrl, title, handle, genre) {
+      if (!currentUser) { openAuthModal(); return; }
+      pendingSavePostId = { id: postId, image_url: imgUrl, title, handle, genre };
+      
+      const selectDropdown = document.getElementById('selectCatalogDropdown');
+      selectDropdown.innerHTML = userCatalogsList.map(cat => `<option value="${escapeHtml(cat)}">${escapeHtml(cat)}</option>`).join('');
+
+      document.getElementById('newCatalogInput').value = '';
+      document.getElementById('saveCatalogModal').classList.remove('hidden');
+    }
+
+    function closeSaveCatalogModal() {
+      document.getElementById('saveCatalogModal').classList.add('hidden');
+      pendingSavePostId = null;
+    }
+
+    function confirmSaveToCatalog() {
+      if (!pendingSavePostId || !currentUser) return;
+
+      const newCat = document.getElementById('newCatalogInput').value.trim();
+      let chosenCatalog = newCat || document.getElementById('selectCatalogDropdown').value;
+
+      if (!chosenCatalog) chosenCatalog = 'Favorites';
+
+      if (newCat && !userCatalogsList.includes(newCat)) {
+        userCatalogsList.push(newCat);
+      }
+
+      const existingIndex = savedPhotosCache.findIndex(s => s.id === pendingSavePostId.id);
+      if (existingIndex >= 0) {
+        savedPhotosCache[existingIndex].catalog = chosenCatalog;
+      } else {
+        savedPhotosCache.push({
+          ...pendingSavePostId,
+          catalog: chosenCatalog,
+          saved_at: Date.now()
+        });
+      }
+
+      saveUserDataToStorage();
+      showToast(`Saved to catalog "${chosenCatalog}"!`);
+      closeSaveCatalogModal();
+      loadFeed();
+      if (activeProfileSubTab === 'saved') renderSavedFeed();
+    }
+
     function openCompactModal(postId, imgUrl, title, handle, genre, caption, camera, lens, focal, aperture, shutter, iso) {
       document.getElementById('modalImage').src = imgUrl;
       document.getElementById('modalTitle').textContent = title;
@@ -1224,6 +1518,22 @@
       authorContainer.innerHTML = `<span onclick="closeCompactModal(); viewUserProfile('${escapeHtml(handle)}')" class="text-white hover:underline cursor-pointer font-mono">${escapeHtml(handle)}</span>`;
       
       document.getElementById('modalGenre').textContent = genre;
+
+      const actionsContainer = document.getElementById('modalActions');
+      const isLiked = !!likesCache[postId];
+      const isSaved = savedPhotosCache.some(s => s.id === postId);
+
+      actionsContainer.innerHTML = `
+        <button onclick="toggleLike('${postId}')" class="text-xs font-mono flex items-center gap-1 ${isLiked ? 'text-red-400' : 'text-gray-400 hover:text-white'}">
+          <svg class="w-3.5 h-3.5" fill="${isLiked ? 'currentColor' : 'none'}" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+        </button>
+        <button onclick="openShareModal('${escapeHtml(imgUrl)}', '${escapeHtml(title)}')" class="text-xs font-mono text-gray-400 hover:text-white">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 100-5.367 3 3 0 000 5.367zm0 8.474a3 3 0 100-5.367 3 3 0 000 5.367z"></path></svg>
+        </button>
+        <button onclick="openSaveToCatalogDialog('${postId}', '${escapeHtml(imgUrl)}', '${escapeHtml(title)}', '${escapeHtml(handle)}', '${escapeHtml(genre)}')" class="text-xs font-mono ${isSaved ? 'text-amber-400' : 'text-gray-400 hover:text-white'}">
+          <svg class="w-3.5 h-3.5" fill="${isSaved ? 'currentColor' : 'none'}" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path></svg>
+        </button>
+      `;
       
       const captionContainer = document.getElementById('modalCaptionContainer');
       if (caption && caption.trim()) {
@@ -1263,7 +1573,6 @@
       } else {
         modalCritiquesList.innerHTML = postCritiques.map(c => {
           const isCritiqueOwner = currentUser && currentUser.id === c.user_id;
-          const isPostOwner = currentUser && currentUser.id === c.user_id; // approximate check or allow deletion
           const critiqueHandle = c.user_email ? ('@' + c.user_email.split('@')[0]) : '@artist';
 
           return `
@@ -1360,7 +1669,6 @@
         if (error) throw error;
         showToast('Critique submitted successfully.');
 
-        // Refresh cache
         const { data: critiques } = await supabaseClient.from('critiques').select('*');
         allCritiquesCache = critiques || [];
 
@@ -1492,12 +1800,13 @@
       }
 
       document.getElementById('profilePostCount').textContent = filteredPosts.length;
+      document.getElementById('profileSavedCount').textContent = savedPhotosCache.length;
 
       if (filteredPosts.length === 0) {
         profileContainer.innerHTML = `
           <div class="text-center py-24 space-y-3 col-span-3">
-            <p class="text-gray-400 editorial-font italic text-xl">No photographs found matching your search.</p>
-            <p class="text-xs text-gray-500 uppercase tracking-widest font-mono">Try clearing your search or filter.</p>
+            <p class="text-gray-400 editorial-font italic text-xl">No published photographs found.</p>
+            <p class="text-xs text-gray-500 uppercase tracking-widest font-mono">Publish work using the bottom right + button.</p>
           </div>`;
         return;
       }
@@ -1548,11 +1857,56 @@
       `).join('');
     }
 
+    function renderSavedFeed() {
+      const savedContainer = document.getElementById('savedFeed');
+      const catalogFilterSelect = document.getElementById('catalogFilterSelect');
+
+      catalogFilterSelect.innerHTML = `<option value="All">All Catalogs</option>` + 
+        userCatalogsList.map(c => `<option value="${escapeHtml(c)}" ${c === currentSavedCatalogFilter ? 'selected' : ''}>${escapeHtml(c)}</option>`).join('');
+
+      let filtered = savedPhotosCache;
+      if (currentSavedCatalogFilter !== 'All') {
+        filtered = filtered.filter(s => s.catalog === currentSavedCatalogFilter);
+      }
+
+      if (filtered.length === 0) {
+        savedContainer.innerHTML = `
+          <div class="text-center py-20 text-gray-500 font-light col-span-3">
+            <p class="editorial-font italic text-lg text-gray-400">No photos saved in this catalog yet.</p>
+            <p class="text-xs uppercase font-mono text-gray-600 mt-1">Browse the gallery and click "Save to Catalog"</p>
+          </div>
+        `;
+        return;
+      }
+
+      savedContainer.innerHTML = filtered.map(item => `
+        <div class="relative group aspect-square bg-black overflow-hidden cursor-pointer" onclick="openCompactModal('${item.id}', '${escapeHtml(item.image_url)}', '${escapeHtml(item.title)}', '${escapeHtml(item.handle)}', '${escapeHtml(item.genre)}', '', '', '', '', '', '', '')">
+          <img src="${escapeHtml(item.image_url)}" alt="${escapeHtml(item.title)}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+          <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition flex flex-col items-center justify-center text-white text-xs p-2 text-center space-y-1">
+            <span class="font-semibold">${escapeHtml(item.title)}</span>
+            <span class="text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2 py-0.5 rounded font-mono">${escapeHtml(item.catalog)}</span>
+            <button onclick="event.stopPropagation(); removeFromCatalog('${item.id}')" class="text-[10px] text-red-400 hover:underline pt-2 font-mono">Remove from Catalog</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function filterSavedCatalog(cat) {
+      currentSavedCatalogFilter = cat;
+      renderSavedFeed();
+    }
+
+    function removeFromCatalog(postId) {
+      savedPhotosCache = savedPhotosCache.filter(s => s.id !== postId);
+      saveUserDataToStorage();
+      showToast('Removed photo from catalog.');
+      renderSavedFeed();
+      loadFeed();
+    }
+
     function toggleEditPost(idKey) {
       const box = document.getElementById(`editPostBox_${idKey}`);
-      if (box) {
-        box.classList.toggle('hidden');
-      }
+      if (box) box.classList.toggle('hidden');
     }
 
     async function savePostEdits(postId, isProfile = false) {
@@ -1608,16 +1962,11 @@
 
     function toggleCritiqueSection(postId) {
       const section = document.getElementById(`critiqueSection_${postId}`);
-      if (section) {
-        section.classList.toggle('hidden');
-      }
+      if (section) section.classList.toggle('hidden');
     }
 
     async function submitCritique(postId) {
-      if (!currentUser) {
-        openAuthModal();
-        return;
-      }
+      if (!currentUser) { openAuthModal(); return; }
 
       const comp = document.getElementById(`compScore_${postId}`).value;
       const light = document.getElementById(`lightScore_${postId}`).value;
@@ -1654,11 +2003,7 @@
       if (!confirm("Are you sure you want to delete this critique?")) return;
 
       try {
-        const { error } = await supabaseClient
-          .from('critiques')
-          .delete()
-          .eq('id', critiqueId);
-
+        const { error } = await supabaseClient.from('critiques').delete().eq('id', critiqueId);
         if (error) throw error;
 
         showToast('Critique deleted successfully.');
