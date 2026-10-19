@@ -345,6 +345,24 @@
 
   </main>
 
+  <!-- COMPACT VIEW LIGHTBOX / PREVIEW MODAL -->
+  <div id="compactModal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 hidden">
+    <div class="bg-charcoal-800 border border-charcoal-700 max-w-2xl w-full rounded-lg overflow-hidden shadow-2xl relative max-h-[90vh] flex flex-col">
+      <div class="px-4 py-3 bg-charcoal-900 border-b border-charcoal-700 flex items-center justify-between">
+        <h3 id="modalTitle" class="font-medium text-white text-sm">Photograph Title</h3>
+        <button onclick="closeCompactModal()" class="text-gray-400 hover:text-white text-sm">✕ Close</button>
+      </div>
+      <div class="bg-black flex items-center justify-center p-2 flex-1 overflow-hidden">
+        <img id="modalImage" src="" alt="Enlarged View" class="max-h-[60vh] w-auto object-contain">
+      </div>
+      <div class="p-4 bg-charcoal-800 border-t border-charcoal-700 space-y-2 text-xs overflow-y-auto max-h-[30vh]">
+        <p class="text-gray-300 font-mono">By <span id="modalAuthor" class="text-white">@artist</span> &bull; Genre: <span id="modalGenre" class="text-gray-400"></span></p>
+        <p id="modalCaption" class="text-gray-200 font-sans leading-relaxed"></p>
+        <div id="modalExif" class="grid grid-cols-2 sm:grid-cols-3 gap-2 font-mono text-[11px] text-gray-400 pt-2 border-t border-charcoal-700/60"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- AUTH MODAL -->
   <div id="authModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center hidden">
     <div class="bg-charcoal-800 border border-charcoal-700 w-full max-w-md p-6 rounded-lg shadow-2xl relative">
@@ -855,8 +873,22 @@
         feedContainer.className = "grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4";
         feedContainer.innerHTML = posts.map(post => {
           const authorHandle = post.handle ? `@${post.handle}` : '@artist';
+          
+          // Escape data safely for passing into openCompactModal
+          const safeTitle = escapeHtml(post.title || 'Untitled').replace(/'/g, "\\'");
+          const safeHandle = escapeHtml(authorHandle).replace(/'/g, "\\'");
+          const safeGenre = escapeHtml(post.genre || 'General').replace(/'/g, "\\'");
+          const safeCaption = escapeHtml(post.caption || '').replace(/'/g, "\\'").replace(/\n/g, ' ');
+          const safeImg = escapeHtml(post.image_url);
+          const safeCamera = escapeHtml(post.camera || '');
+          const safeLens = escapeHtml(post.lens || '');
+          const safeFocal = escapeHtml(post.focal_length || '');
+          const safeAperture = escapeHtml(post.aperture || '');
+          const safeShutter = escapeHtml(post.shutter_speed || '');
+          const safeIso = escapeHtml(post.iso || '');
+
           return `
-            <div class="relative group aspect-square bg-charcoal-800 border border-charcoal-700 rounded-lg overflow-hidden shadow-md flex flex-col">
+            <div class="relative group aspect-square bg-charcoal-800 border border-charcoal-700 rounded-lg overflow-hidden shadow-md flex flex-col cursor-pointer" onclick="openCompactModal('${safeImg}', '${safeTitle}', '${safeHandle}', '${safeGenre}', '${safeCaption}', '${safeCamera}', '${safeLens}', '${safeFocal}', '${safeAperture}', '${safeShutter}', '${safeIso}')">
               <div class="flex-1 overflow-hidden relative">
                 <img src="${escapeHtml(post.image_url)}" alt="${escapeHtml(post.title || 'Photograph')}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
               </div>
@@ -1095,6 +1127,30 @@
           </article>
         `;
       }).join('');
+    }
+
+    function openCompactModal(imgUrl, title, handle, genre, caption, camera, lens, focal, aperture, shutter, iso) {
+      document.getElementById('modalImage').src = imgUrl;
+      document.getElementById('modalTitle').textContent = title;
+      document.getElementById('modalAuthor').textContent = handle;
+      document.getElementById('modalGenre').textContent = genre;
+      document.getElementById('modalCaption').textContent = caption || 'No caption provided.';
+      
+      const exifContainer = document.getElementById('modalExif');
+      let exifHtml = '';
+      if (camera) exifHtml += `<div>Body: ${camera}</div>`;
+      if (lens) exifHtml += `<div>Lens: ${lens}</div>`;
+      if (focal) exifHtml += `<div>Focal: ${focal}</div>`;
+      if (aperture) exifHtml += `<div>Aperture: ${aperture}</div>`;
+      if (shutter) exifHtml += `<div>Shutter: ${shutter}</div>`;
+      if (iso) exifHtml += `<div>ISO: ${iso}</div>`;
+      exifContainer.innerHTML = exifHtml || '<div class="text-gray-500">No EXIF data recorded.</div>';
+
+      document.getElementById('compactModal').classList.remove('hidden');
+    }
+
+    function closeCompactModal() {
+      document.getElementById('compactModal').classList.add('hidden');
     }
 
     function toggleCaption(postId) {
