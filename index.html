@@ -298,7 +298,10 @@
 
         <!-- Caption / Story -->
         <div>
-          <label class="block text-xs uppercase tracking-wider text-gray-400 mb-1 font-mono">Caption / Story</label>
+          <div class="flex justify-between items-center mb-1">
+            <label class="block text-xs uppercase tracking-wider text-gray-400 font-mono">Caption / Story</label>
+            <span class="text-[10px] text-gray-500 font-mono">Max 50 words</span>
+          </div>
           <textarea id="photoCaption" rows="3" placeholder="Tell the story behind this photograph..." class="w-full bg-charcoal-900 border border-charcoal-700 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-gray-500"></textarea>
         </div>
 
@@ -357,7 +360,10 @@
       </div>
       <div class="p-4 bg-charcoal-800 border-t border-charcoal-700 space-y-2 text-xs overflow-y-auto max-h-[30vh]">
         <p class="text-gray-300 font-mono">By <span id="modalAuthor" class="text-white">@artist</span> &bull; Genre: <span id="modalGenre" class="text-gray-400"></span></p>
-        <p id="modalCaption" class="text-gray-200 font-sans leading-relaxed"></p>
+        
+        <!-- Truncated Modal Caption Area -->
+        <div id="modalCaptionContainer" class="text-gray-200 font-sans leading-relaxed"></div>
+        
         <div id="modalExif" class="grid grid-cols-2 sm:grid-cols-3 gap-2 font-mono text-[11px] text-gray-400 pt-2 border-t border-charcoal-700/60"></div>
       </div>
     </div>
@@ -775,6 +781,15 @@
       e.preventDefault();
       if (!selectedFile || !currentUser) return;
 
+      const captionVal = document.getElementById('photoCaption').value.trim();
+      if (captionVal) {
+        const words = captionVal.split(/\s+/);
+        if (words.length > 50) {
+          alert(`Your caption is ${words.length} words long. Please keep captions under 50 words.`);
+          return;
+        }
+      }
+
       const submitBtn = document.getElementById('submitBtn');
       submitBtn.textContent = 'Uploading to Cloud...';
       submitBtn.disabled = true;
@@ -806,7 +821,7 @@
           avatar_url: userAvatar,
           title: document.getElementById('photoTitle').value,
           genre: document.getElementById('photoGenre').value,
-          caption: document.getElementById('photoCaption').value,
+          caption: captionVal,
           image_url: publicUrl,
           camera: document.getElementById('exifCamera').value,
           lens: document.getElementById('exifLens').value,
@@ -874,7 +889,6 @@
         feedContainer.innerHTML = posts.map(post => {
           const authorHandle = post.handle ? `@${post.handle}` : '@artist';
           
-          // Escape data safely for passing into openCompactModal
           const safeTitle = escapeHtml(post.title || 'Untitled').replace(/'/g, "\\'");
           const safeHandle = escapeHtml(authorHandle).replace(/'/g, "\\'");
           const safeGenre = escapeHtml(post.genre || 'General').replace(/'/g, "\\'");
@@ -888,7 +902,7 @@
           const safeIso = escapeHtml(post.iso || '');
 
           return `
-            <div class="relative group aspect-square bg-charcoal-800 border border-charcoal-700 rounded-lg overflow-hidden shadow-md flex flex-col cursor-pointer" onclick="openCompactModal('${safeImg}', '${safeTitle}', '${safeHandle}', '${safeGenre}', '${safeCaption}', '${safeCamera}', '${safeLens}', '${safeFocal}', '${safeAperture}', '${safeShutter}', '${safeIso}')">
+            <div class="relative group aspect-square bg-charcoal-800 border border-charcoal-700 rounded-lg overflow-hidden shadow-md flex flex-col cursor-pointer" onclick="openCompactModal('${post.id}', '${safeImg}', '${safeTitle}', '${safeHandle}', '${safeGenre}', '${safeCaption}', '${safeCamera}', '${safeLens}', '${safeFocal}', '${safeAperture}', '${safeShutter}', '${safeIso}')">
               <div class="flex-1 overflow-hidden relative">
                 <img src="${escapeHtml(post.image_url)}" alt="${escapeHtml(post.title || 'Photograph')}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
               </div>
@@ -1129,13 +1143,30 @@
       }).join('');
     }
 
-    function openCompactModal(imgUrl, title, handle, genre, caption, camera, lens, focal, aperture, shutter, iso) {
+    function openCompactModal(postId, imgUrl, title, handle, genre, caption, camera, lens, focal, aperture, shutter, iso) {
       document.getElementById('modalImage').src = imgUrl;
       document.getElementById('modalTitle').textContent = title;
       document.getElementById('modalAuthor').textContent = handle;
       document.getElementById('modalGenre').textContent = genre;
-      document.getElementById('modalCaption').textContent = caption || 'No caption provided.';
       
+      // Caption handling with 25-word Read More toggle inside compact modal
+      const captionContainer = document.getElementById('modalCaptionContainer');
+      if (caption && caption.trim()) {
+        const words = caption.trim().split(/\s+/);
+        if (words.length > 25) {
+          const shortText = words.slice(0, 25).join(' ') + '...';
+          captionContainer.innerHTML = `
+            <span id="modalCaptionShort_${postId}">${escapeHtml(shortText)}</span>
+            <span id="modalCaptionFull_${postId}" class="hidden">${escapeHtml(caption)}</span>
+            <button onclick="toggleCaption('modal_' + '${postId}')" id="captionBtn_modal_${postId}" class="text-gray-400 hover:text-white font-mono ml-1 underline text-[11px]">Read More...</button>
+          `;
+        } else {
+          captionContainer.innerHTML = `<p>${escapeHtml(caption)}</p>`;
+        }
+      } else {
+        captionContainer.innerHTML = `<p class="text-gray-500 italic">No caption provided.</p>`;
+      }
+
       const exifContainer = document.getElementById('modalExif');
       let exifHtml = '';
       if (camera) exifHtml += `<div>Body: ${camera}</div>`;
@@ -1153,10 +1184,15 @@
       document.getElementById('compactModal').classList.add('hidden');
     }
 
-    function toggleCaption(postId) {
-      const shortEl = document.getElementById(`captionShort_${postId}`);
-      const fullEl = document.getElementById(`captionFull_${postId}`);
-      const btnEl = document.getElementById(`captionBtn_${postId}`);
+    function toggleCaption(postIdKey) {
+      const isModal = postIdKey.startsWith('modal_');
+      const shortId = isModal ? `modalCaptionShort_${postIdKey.replace('modal_', '')}` : `captionShort_${postIdKey}`;
+      const fullId = isModal ? `modalCaptionFull_${postIdKey.replace('modal_', '')}` : `captionFull_${postIdKey}`;
+      const btnId = `captionBtn_${postIdKey}`;
+
+      const shortEl = document.getElementById(shortId);
+      const fullEl = document.getElementById(fullId);
+      const btnEl = document.getElementById(btnId);
 
       if (shortEl && fullEl && btnEl) {
         if (shortEl.classList.contains('hidden')) {
@@ -1245,7 +1281,7 @@
             </div>
 
             <div>
-              <label class="block text-gray-400 mb-1 font-mono">Caption / Story</label>
+              <label class="block text-gray-400 mb-1 font-mono">Caption / Story (Max 50 words)</label>
               <textarea id="editCaption_profile_${post.id}" rows="2" class="w-full bg-charcoal-900 border border-charcoal-700 rounded px-2.5 py-1.5 text-white">${escapeHtml(post.caption || '')}</textarea>
             </div>
 
@@ -1273,7 +1309,15 @@
       
       const title = document.getElementById(`editTitle_${key}`).value;
       const genre = document.getElementById(`editGenre_${key}`).value;
-      const caption = document.getElementById(`editCaption_${key}`).value;
+      const caption = document.getElementById(`editCaption_${key}`).value.trim();
+
+      if (caption) {
+        const words = caption.split(/\s+/);
+        if (words.length > 50) {
+          alert(`Your caption is ${words.length} words long. Please keep captions under 50 words.`);
+          return;
+        }
+      }
       
       const cameraEl = document.getElementById(`editCamera_${key}`);
       const lensEl = document.getElementById(`editLens_${key}`);
