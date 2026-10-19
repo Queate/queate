@@ -408,7 +408,7 @@
 
   <!-- Application Logic Script -->
   <script>
- // Supabase Configuration
+    // Supabase Configuration
     const SUPABASE_URL = 'https://rljhjqaqxzjfjcpkwaxy.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJsamhqcWFxeHpqZmpjcGt3YXh5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzMDUwNTAsImV4cCI6MjEwNzg4MTA1MH0.ZqPWN1GWmnbU677e8b4_1goXtm5S0dzf7g-UC6jDOzg';
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -817,6 +817,7 @@
         const postData = {
           user_id: currentUser.id,
           handle: cleanHandle,
+          author_handle: cleanHandle,
           author_name: displayName,
           avatar_url: userAvatar,
           title: document.getElementById('photoTitle').value,
@@ -1149,7 +1150,6 @@
       document.getElementById('modalAuthor').textContent = handle;
       document.getElementById('modalGenre').textContent = genre;
       
-      // Caption handling with 25-word Read More toggle inside compact modal
       const captionContainer = document.getElementById('modalCaptionContainer');
       if (caption && caption.trim()) {
         const words = caption.trim().split(/\s+/);
