@@ -880,6 +880,25 @@
 
         const postCritiques = critiques ? critiques.filter(c => c.post_id === post.id) : [];
 
+        // Caption formatting (> 25 words -> Read More toggle)
+        let captionHtml = '';
+        if (post.caption) {
+          const words = post.caption.trim().split(/\s+/);
+          if (words.length > 25) {
+            const shortText = words.slice(0, 25).join(' ') + '...';
+            const fullText = post.caption;
+            captionHtml = `
+              <div class="text-xs text-gray-200 leading-relaxed font-sans">
+                <span id="captionShort_${post.id}">${escapeHtml(shortText)}</span>
+                <span id="captionFull_${post.id}" class="hidden">${escapeHtml(fullText)}</span>
+                <button onclick="toggleCaption('${post.id}')" id="captionBtn_${post.id}" class="text-gray-400 hover:text-white font-mono ml-1 underline text-[11px]">Read More...</button>
+              </div>
+            `;
+          } else {
+            captionHtml = `<p class="text-xs text-gray-200 leading-relaxed font-sans">${escapeHtml(post.caption)}</p>`;
+          }
+        }
+
         return `
           <article class="bg-charcoal-800 border border-charcoal-700 rounded-lg overflow-hidden shadow-2xl">
             <div class="px-6 py-4 flex items-center justify-between border-b border-charcoal-700/60">
@@ -962,7 +981,7 @@
             </div>
 
             <div class="px-6 py-4 bg-charcoal-800/90 border-t border-charcoal-700/60 space-y-3">
-              ${post.caption ? `<p class="text-xs text-gray-200 leading-relaxed font-sans">${escapeHtml(post.caption)}</p>` : ''}
+              ${captionHtml}
               
               <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-1">
                 <div class="grid grid-cols-2 sm:flex sm:flex-wrap gap-x-6 gap-y-1 text-xs font-mono text-gray-300">
@@ -1076,6 +1095,24 @@
           </article>
         `;
       }).join('');
+    }
+
+    function toggleCaption(postId) {
+      const shortEl = document.getElementById(`captionShort_${postId}`);
+      const fullEl = document.getElementById(`captionFull_${postId}`);
+      const btnEl = document.getElementById(`captionBtn_${postId}`);
+
+      if (shortEl && fullEl && btnEl) {
+        if (shortEl.classList.contains('hidden')) {
+          shortEl.classList.remove('hidden');
+          fullEl.classList.add('hidden');
+          btnEl.textContent = 'Read More...';
+        } else {
+          shortEl.classList.add('hidden');
+          fullEl.classList.remove('hidden');
+          btnEl.textContent = 'Show Less';
+        }
+      }
     }
 
     async function loadProfileFeed() {
